@@ -104,7 +104,7 @@ Use **`WeissChamberController-Multi`** for controlling multiple chambers simulta
 
 ---
 
-## ���� Protocol Information
+##  Protocol Information
 
 The system communicates with chambers using a **binary serial protocol**:
 
@@ -220,7 +220,7 @@ For questions or support: [TOPTUBBY](https://github.com/TOPTUBBY)
 
 | Version | Date | Notes |
 |---------|------|-------|
-| **v1.0** | 2026-03-05 | 🎉 Initial Release |
+| **v2.0.11.2025** | 2026-03-05 | 🎉 Initial Release |
 | | | ✨ Single chamber support |
 | | | ✨ Multi-chamber orchestration |
 | | | ✨ Complete protocol implementation |
