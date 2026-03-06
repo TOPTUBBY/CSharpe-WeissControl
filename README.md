@@ -7,6 +7,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Language: C#](https://img.shields.io/badge/Language-C%23-239120?logo=csharp)](https://docs.microsoft.com/en-us/dotnet/csharp/)
+![Framework: .NET Framework 4.5](https://img.shields.io/badge/Framework-.NET%204.5-512BD4.svg)
 [![Status: Active](https://img.shields.io/badge/Status-Active-brightgreen)](https://github.com/TOPTUBBY/CSharpe-WeissControl)
 ![Version](https://img.shields.io/badge/Version-2.0.11.2025-red.svg)
 
