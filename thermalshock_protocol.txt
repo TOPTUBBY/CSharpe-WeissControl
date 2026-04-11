@@ -1,0 +1,94 @@
+0001.0 0001.0 0080.0 0080.5 0080.0 0080.2 -045.0 -044.9 0000.0 0000.0 0300.0 0160.0 0000.0 0000.0 0003.0 01110000000000000000000000000000
+cradposset cradposact tempcradset tempcradact temphotset temphotact tempcoldset tempcoldact 
+
+ASCII-2 PROTOCOL CONFIGURATION
+Configuration type: DYNAMIC
+
+Check Extern mode: enabled
+Show target setpoint: disabled
+Example of an ASCII E-String:
+$01E CV01 CV02 CV03 CV04 CV05 CV06 SV01 SV02 SV03 DO00DO01DO02DO03DO04DO05DO06DO07DO08DO09DO10DO11DO12DO13DO14DO15DO16<CR>
+
+Description:
+CV01  value min:    1.0   value max:    2.0   Cradlepos.
+CV02  value min:  -90.0   value max:  220.0   Temp. cradle
+CV03  value min:    0.0   value max:  220.0   Hotchamber
+CV04  value min:  -85.0   value max:  100.0   Coldchamber
+CV05  value min:    0.0   value max:    0.0   Reserve
+CV06  value min:    0.0   value max: 9999.0   Cycles
+SV01  value min:    0.0   value max: 5000.0   Def. Break
+SV02  value min:    0.0   value max: 1000.0   Defrost
+SV03  value min:    3.0   value max:  120.0   TimeStep
+DO00  unused
+DO01  Start
+DO02  Temp.Hotcha.
+DO03  Temp.Coldcha
+DO04  Reserved
+DO05  Control.lift
+DO06  Reserved
+DO07  lift slow
+DO08  LN2
+DO09  Custom Out1
+DO10  Custom Out2
+DO11  Custom Out3
+DO12  Custom Out4
+DO13  Defrost
+DO14  Comp.air/GN2
+DO15  Lamp test
+DO16  power save
+--------------------------------------------------------------------------------
+Example of  an ASCII I-String:
+$01I<CR>
+CV01 CV01 CV02 CV02 CV03 CV03 CV04 CV04 CV05 CV05 CV06 CV06 SV01 SV02 SV03 DO00DO01DO02DO03DO04DO05DO06DO07DO08DO09DO10DO11DO12DO13DO14DO15DO16DO17DO18DO19DO20DO21DO22DO23DO24DO25DO26DO27DO28DO29DO30DO31<CR>
+
+Description:
+CV01  nominal value Cradlepos.
+CV01  actual value  Cradlepos.
+CV02  nominal value Temp. cradle
+CV02  actual value  Temp. cradle
+CV03  nominal value Hotchamber
+CV03  actual value  Hotchamber
+CV04  nominal value Coldchamber
+CV04  actual value  Coldchamber
+CV05  nominal value Reserve
+CV05  actual value  Reserve
+CV06  nominal value Cycles
+CV06  actual value  Cycles
+SV01  set value     Def. Break
+SV02  set value     Defrost
+SV03  set value     TimeStep
+DO00  unused
+DO01  Start
+DO02  Temp.Hotcha.
+DO03  Temp.Coldcha
+DO04  Reserved
+DO05  Control.lift
+DO06  Reserved
+DO07  lift slow
+DO08  LN2
+DO09  Custom Out1
+DO10  Custom Out2
+DO11  Custom Out3
+DO12  Custom Out4
+DO13  Defrost
+DO14  Comp.air/GN2
+DO15  Lamp test
+DO16  power save
+DO17  unused
+DO18  unused
+DO19  unused
+DO20  unused
+DO21  unused
+DO22  unused
+DO23  unused
+DO24  unused
+DO25  unused
+DO26  unused
+DO27  unused
+DO28  unused
+DO29  unused
+DO30  unused
+DO31  unused
+--------------------------------------------------------------------------------
+Configured Messages:
+none
