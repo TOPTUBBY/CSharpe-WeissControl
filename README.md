@@ -37,6 +37,7 @@ A **robust C# application** for automated control and real-time monitoring of **
 CSharpe-WeissControl/
 ├── 🎯 WeissChamberController/          # Single chamber implementation
 ├── 🔄 WeissChamberController-Multi/    # Multi-chamber orchestration
+├── ⚡ WeissChamberController-Shock/    # Thermal shock chamber control
 ├── 📖 weiss-votsch_protocol.txt        # Protocol specifications
 ├── ⚖️  LICENSE                         # MIT License
 └── 📘 README.md                        # This file
@@ -85,6 +86,10 @@ Run the application
 
 ### 🎯 Single Chamber Mode
 
+<div align="center">
+  <img src="Assets/climatic.jpg" width="600" alt="Climatic Chamber GUI">
+</div>
+
 Use **`WeissChamberController`** when managing a single environmental chamber.
 
 ```
@@ -102,6 +107,21 @@ Use **`WeissChamberController-Multi`** for controlling multiple chambers simulta
 ✓ Centralized monitoring
 ✓ Batch testing capabilities
 ✓ Load balancing
+```
+
+### ⚡ Thermal Shock Chamber Mode
+
+<div align="center">
+  <img src="Assets/shock.jpg" width="600" alt="Thermal Shock Chamber GUI">
+</div>
+
+Use **`WeissChamberController-Shock`** for managing thermal shock testing chambers.
+
+```
+✓ Hot/Cold zone management
+✓ Basket transfer control
+✓ Rapid temperature cycle monitoring
+✓ Dedicated shock test profiling
 ```
 
 ---
@@ -131,27 +151,33 @@ Commands | Parameters | Configuration
 | W27_ESS_C_1000_70_5 | 5 parameters | 32-bit control |
 | W28_ESS_C_1300_70_10 | 7 parameters | 32-bit control |
 | W29_ESS_T_1700_70_8 | 5 parameters | 32-bit control |
+| Thermal Shock Series | 15 parameters | 32-bit control |
 
-*See `weiss-votsch_protocol.txt` for complete protocol details*
+*See `weiss-votsch_protocol.txt` and `thermalshock_protocol.txt` for complete protocol details*
+
+#### ⚡ Thermal Shock Protocol Overview
+The thermal shock protocol uses ASCII-2 DYNAMIC configuration spanning 47 data points per I-String, expanding standard control with:
+- **15 Value Parameters**: Hot/Cold chamber temperatures, Cradle position, Cycles, and Defrost settings.
+- **32-Bit Control Flags**: Managing precise hardware like Lift control, LN2 injection, Comp. air/GN2, and Custom outputs.
 
 ---
 
 ## 🎯 Core Components
 
 ### 🔧 Control Module
-- ⚙️ Chamber parameter management
-- 🎚️ Set-point configuration
-- ⏱️ Ramp rate control
+- ⚙️ **Standard Chambers:** Parameter management, set-point configuration, and ramp rate control.
+- ⚡ **Shock Chambers:** Multi-zone orchestration (Hot/Cold/Cradle), precise Basket position handling, and robust cycle tracking (supports models like `W7_Shock`, `W11_Shock`).
 
 ### 📊 Logging Module
-- 📈 Real-time data capture
-- 💾 Persistent storage
-- 📋 CSV/Log export
+- 📈 Real-time data capture across all active test zones.
+- 💾 Persistent storage and complete audit trails.
+- 📋 CSV/Log export for detailed reporting.
 
-### 🔌 Communication Module
-- 🔗 Serial protocol implementation
-- ⚡ Real-time data streaming
-- 🛡️ Error handling & recovery
+### 🔌 Communication Interface (`ITransport`)
+- 🌐 **TCP/IP (Ethernet):** Network-based controller communication via `TcpTransport`.
+- 🔗 **Serial (RS-232/RS-485):** Direct COM port integration via `SerialTransport`.
+- ⚡ Real-time continuous data streaming and dynamic parsing.
+- 🛡️ Advanced connection state management, timeout handling, and automatic recovery built-in.
 
 ---
 
@@ -212,7 +238,7 @@ For questions or support: [TOPTUBBY](https://github.com/TOPTUBBY)
 | Aspect | Status |
 |--------|--------|
 | Development | 🟢 Active |
-| Latest Update | 🕐 March 5, 2026 |
+| Latest Update | 🕐 April 11, 2026 |
 | Stability | 🟢 Stable |
 | Production Ready | ✅ Yes |
 
@@ -222,6 +248,7 @@ For questions or support: [TOPTUBBY](https://github.com/TOPTUBBY)
 
 | Version | Date | Notes |
 |---------|------|-------|
+| **v1.0.4.2026** | 2026-04-11 | 🎉 Added WeissChamberController-Shock |
 | **v2.0.11.2025** | 2026-03-05 | 🎉 Initial Release |
 | | | ✨ Single chamber support |
 | | | ✨ Multi-chamber orchestration |
@@ -233,12 +260,14 @@ For questions or support: [TOPTUBBY](https://github.com/TOPTUBBY)
 
 ### 🚀 Ready to get started?
 
-[📖 Read the Protocol](weiss-votsch_protocol.txt) • [🐛 Report Issue](https://github.com/TOPTUBBY/CSharpe-WeissControl/issues) • [💬 Discussions](https://github.com/TOPTUBBY/CSharpe-WeissControl/discussions)
+**[📖 Standard Protocol](weiss-votsch_protocol.txt)** • **[⚡ Thermal Shock Protocol](thermalshock_protocol.txt)**
+
+[🐛 Report Issue](https://github.com/TOPTUBBY/CSharpe-WeissControl/issues) • [💬 Discussions](https://github.com/TOPTUBBY/CSharpe-WeissControl/discussions)
 
 ---
 
 **Made with ❤️ for precise environmental control**
 
-*Last Updated: March 5, 2026 | MIT License © 2026*
+*Last Updated: April 11, 2026 | MIT License © 2026*
 
 </div>
