@@ -63,6 +63,8 @@
             this.panel2 = new System.Windows.Forms.Panel();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
+            this.cmbLogFileMode = new System.Windows.Forms.ComboBox();
+            this.labelLogFileMode = new System.Windows.Forms.Label();
             this.btnBrowseLogPath = new System.Windows.Forms.Button();
             this.label9 = new System.Windows.Forms.Label();
             this.txtLogPath = new System.Windows.Forms.TextBox();
@@ -466,6 +468,8 @@
             // 
             // groupBox3
             // 
+            this.groupBox3.Controls.Add(this.cmbLogFileMode);
+            this.groupBox3.Controls.Add(this.labelLogFileMode);
             this.groupBox3.Controls.Add(this.btnBrowseLogPath);
             this.groupBox3.Controls.Add(this.label9);
             this.groupBox3.Controls.Add(this.txtLogPath);
@@ -480,6 +484,24 @@
             this.groupBox3.TabIndex = 8;
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "Logging";
+            //
+            // cmbLogFileMode
+            //
+            this.cmbLogFileMode.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cmbLogFileMode.FormattingEnabled = true;
+            this.cmbLogFileMode.Location = new System.Drawing.Point(181, 20);
+            this.cmbLogFileMode.Name = "cmbLogFileMode";
+            this.cmbLogFileMode.Size = new System.Drawing.Size(107, 24);
+            this.cmbLogFileMode.TabIndex = 10;
+            //
+            // labelLogFileMode
+            //
+            this.labelLogFileMode.AutoSize = true;
+            this.labelLogFileMode.Location = new System.Drawing.Point(105, 24);
+            this.labelLogFileMode.Name = "labelLogFileMode";
+            this.labelLogFileMode.Size = new System.Drawing.Size(70, 16);
+            this.labelLogFileMode.TabIndex = 9;
+            this.labelLogFileMode.Text = "File mode :";
             // 
             // btnBrowseLogPath
             // 
@@ -673,6 +695,8 @@
         private System.Windows.Forms.Panel panel2;
         private System.Windows.Forms.GroupBox groupBox1;
         private System.Windows.Forms.GroupBox groupBox3;
+        private System.Windows.Forms.ComboBox cmbLogFileMode;
+        private System.Windows.Forms.Label labelLogFileMode;
         private System.Windows.Forms.Button btnBrowseLogPath;
         private System.Windows.Forms.Label label9;
         private System.Windows.Forms.TextBox txtLogPath;

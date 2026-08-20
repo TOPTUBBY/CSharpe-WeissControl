@@ -112,6 +112,10 @@ namespace Form1
             // Set default CSV file name prefix
             txtFileNamePrefix.Text = "TestChamberLog";
 
+            // Single file is the default; Daily file creates a new CSV at midnight
+            cmbLogFileMode.Items.AddRange(new object[] { "Single file", "Daily file" });
+            cmbLogFileMode.SelectedIndex = 0;
+
             // Set default log directory path
             _logDirectoryPath = "D:\\Data";
             txtLogPath.Text = _logDirectoryPath;
@@ -146,6 +150,7 @@ namespace Form1
                 txtFileNamePrefix.Enabled = logControlsEditable;
                 txtLogPath.Enabled = logControlsEditable;
                 btnBrowseLogPath.Enabled = logControlsEditable;
+                cmbLogFileMode.Enabled = logControlsEditable;
             }
             else
             {
@@ -158,6 +163,7 @@ namespace Form1
                 txtFileNamePrefix.Enabled = true;
                 txtLogPath.Enabled = true;
                 btnBrowseLogPath.Enabled = true;
+                cmbLogFileMode.Enabled = true;
             }
 
             lblCommStatus.Text = isConnected ? "Connected" : "Disconnected";
@@ -209,13 +215,18 @@ namespace Form1
         private void ScheduleNextLogRollover()
         {
             tmrLogRollover.Stop();
-            if (!_isLogging)
+            if (!_isLogging || !IsDailyLogFileMode())
                 return;
 
             DateTime now = DateTime.Now;
             double millisecondsUntilMidnight = (now.Date.AddDays(1) - now).TotalMilliseconds;
             tmrLogRollover.Interval = Math.Max(1000, (int)Math.Ceiling(millisecondsUntilMidnight));
             tmrLogRollover.Start();
+        }
+
+        private bool IsDailyLogFileMode()
+        {
+            return cmbLogFileMode.SelectedIndex == 1;
         }
 
         private void RotateLogFile(DateTime fileTimestamp)
@@ -253,6 +264,7 @@ namespace Form1
                 txtFileNamePrefix.Enabled = true;
                 txtLogPath.Enabled = true;
                 btnBrowseLogPath.Enabled = true;
+                cmbLogFileMode.Enabled = true;
                 txtErrStr.Text = $"Failed to create the new daily CSV file: {ex.Message}. Logging stopped.";
             }
         }
@@ -262,7 +274,7 @@ namespace Form1
             tmrLogRollover.Stop();
             DateTime now = DateTime.Now;
 
-            if (now.Date != _logFileDate)
+            if (IsDailyLogFileMode() && now.Date != _logFileDate)
                 RotateLogFile(now);
             else
                 ScheduleNextLogRollover();
@@ -290,6 +302,7 @@ namespace Form1
                         txtFileNamePrefix.Enabled = true;
                         txtLogPath.Enabled = true;
                         btnBrowseLogPath.Enabled = true;
+                        cmbLogFileMode.Enabled = true;
                         txtErrStr.Text = $"CSV logging stopped. File saved at: {_logFilePath}";
                     };
 
@@ -314,7 +327,7 @@ namespace Form1
             if (_isLogging && _logWriter != null)
             {
                 DateTime logTimestamp = DateTime.Now;
-                if (logTimestamp.Date != _logFileDate)
+                if (IsDailyLogFileMode() && logTimestamp.Date != _logFileDate)
                 {
                     RotateLogFile(logTimestamp);
                     if (!_isLogging || _logWriter == null)
@@ -730,7 +743,8 @@ namespace Form1
                     txtFileNamePrefix.Enabled = false;
                     txtLogPath.Enabled = false;
                     btnBrowseLogPath.Enabled = false;
-                    txtErrStr.Text = $"CSV logging started. File saved at: {_logFilePath}";
+                    cmbLogFileMode.Enabled = false;
+                    txtErrStr.Text = $"CSV logging started ({cmbLogFileMode.Text}). File saved at: {_logFilePath}";
                 }
                 catch (Exception ex)
                 {
@@ -742,6 +756,7 @@ namespace Form1
                     txtFileNamePrefix.Enabled = true;
                     txtLogPath.Enabled = true;
                     btnBrowseLogPath.Enabled = true;
+                    cmbLogFileMode.Enabled = true;
                 }
             }
             else
