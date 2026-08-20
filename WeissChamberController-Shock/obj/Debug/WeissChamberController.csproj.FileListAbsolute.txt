@@ -28,3 +28,13 @@ D:\02_Software\01_C#_Project\CSharpe-WeissControl\WeissChamberController-Shock\b
 D:\02_Software\01_C#_Project\CSharpe-WeissControl\WeissChamberController-Shock\bin\Debug\WeissShockController.pdb
 D:\02_Software\01_C#_Project\CSharpe-WeissControl\WeissChamberController-Shock\obj\Debug\WeissShockController.exe
 D:\02_Software\01_C#_Project\CSharpe-WeissControl\WeissChamberController-Shock\obj\Debug\WeissShockController.pdb
+D:\01_Projects\00_C#\CSharpe-WeissControl\WeissChamberController-Shock\bin\Debug\WeissShockController.exe.config
+D:\01_Projects\00_C#\CSharpe-WeissControl\WeissChamberController-Shock\bin\Debug\WeissShockController.exe
+D:\01_Projects\00_C#\CSharpe-WeissControl\WeissChamberController-Shock\bin\Debug\WeissShockController.pdb
+D:\01_Projects\00_C#\CSharpe-WeissControl\WeissChamberController-Shock\obj\Debug\WeissChamberController.csproj.AssemblyReference.cache
+D:\01_Projects\00_C#\CSharpe-WeissControl\WeissChamberController-Shock\obj\Debug\Form1.Form1.resources
+D:\01_Projects\00_C#\CSharpe-WeissControl\WeissChamberController-Shock\obj\Debug\WeissChamberController.Properties.Resources.resources
+D:\01_Projects\00_C#\CSharpe-WeissControl\WeissChamberController-Shock\obj\Debug\WeissChamberController.csproj.GenerateResource.cache
+D:\01_Projects\00_C#\CSharpe-WeissControl\WeissChamberController-Shock\obj\Debug\WeissChamberController.csproj.CoreCompileInputs.cache
+D:\01_Projects\00_C#\CSharpe-WeissControl\WeissChamberController-Shock\obj\Debug\WeissShockController.exe
+D:\01_Projects\00_C#\CSharpe-WeissControl\WeissChamberController-Shock\obj\Debug\WeissShockController.pdb

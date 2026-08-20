@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("WeissShockController")]
-[assembly: AssemblyDescription("Internal Program for QE APEBU DET9-RD1")]
+[assembly: AssemblyDescription("Internal Program for DQT EVSBG DET9-RD1")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Delta Electronics Thailand PCL")]
 [assembly: AssemblyProduct("WeissShockController")]
@@ -28,5 +28,5 @@ using System.Runtime.InteropServices;
 //      Build Number
 //      Revision
 //
-[assembly: AssemblyVersion("1.0.4.2026")]
-[assembly: AssemblyFileVersion("1.0.4.2026")]
+[assembly: AssemblyVersion("1.1.08.2026")]
+[assembly: AssemblyFileVersion("1.1.08.2026")]

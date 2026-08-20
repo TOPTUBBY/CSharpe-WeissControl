@@ -9,7 +9,7 @@
 [![Language: C#](https://img.shields.io/badge/Language-C%23-239120?logo=csharp)](https://docs.microsoft.com/en-us/dotnet/csharp/)
 ![Framework: .NET Framework 4.5](https://img.shields.io/badge/Framework-.NET%204.5-512BD4.svg)
 [![Status: Active](https://img.shields.io/badge/Status-Active-brightgreen)](https://github.com/TOPTUBBY/CSharpe-WeissControl)
-![Version](https://img.shields.io/badge/Version-2.0.11.2025-red.svg)
+![Version](https://img.shields.io/badge/Version-2.1.08.2026-red.svg)
 
 </div>
 
@@ -238,7 +238,7 @@ For questions or support: [TOPTUBBY](https://github.com/TOPTUBBY)
 | Aspect | Status |
 |--------|--------|
 | Development | 🟢 Active |
-| Latest Update | 🕐 April 11, 2026 |
+| Latest Update | 🕐 August 20, 2026 |
 | Stability | 🟢 Stable |
 | Production Ready | ✅ Yes |
 
@@ -248,7 +248,10 @@ For questions or support: [TOPTUBBY](https://github.com/TOPTUBBY)
 
 | Version | Date | Notes |
 |---------|------|-------|
-| **v1.0.4.2026** | 2026-04-11 | 🎉 Added WeissChamberController-Shock |
+| **v1.1.08.2026** | 2026-08-20 | 🎉 Added logging mode function for WeissChamberController |
+| **v1.1.08.2026** | 2026-08-20 | 🎉 Added logging mode function for WeissChamberController-Multi |
+| **v2.1.08.2026** | 2026-08-20 | 🎉 Added logging mode function for WeissChamberController-Shock |
+| **v1.0.04.2026** | 2026-04-11 | 🎉 Added WeissChamberController-Shock |
 | **v2.0.11.2025** | 2026-03-05 | 🎉 Initial Release |
 | | | ✨ Single chamber support |
 | | | ✨ Multi-chamber orchestration |
@@ -268,6 +271,6 @@ For questions or support: [TOPTUBBY](https://github.com/TOPTUBBY)
 
 **Made with ❤️ for precise environmental control**
 
-*Last Updated: April 11, 2026 | MIT License © 2026*
+*Last Updated: August 20, 2026 | MIT License © 2026*
 
 </div>

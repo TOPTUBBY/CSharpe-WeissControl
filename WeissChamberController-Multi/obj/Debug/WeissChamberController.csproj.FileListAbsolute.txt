@@ -18,3 +18,13 @@ D:\02_Software\01_C#_Project\CSharpe-WeissControl\WeissChamberController-Multi\o
 D:\02_Software\01_C#_Project\CSharpe-WeissControl\WeissChamberController-Multi\obj\Debug\WeissChamberController.csproj.CoreCompileInputs.cache
 D:\02_Software\01_C#_Project\CSharpe-WeissControl\WeissChamberController-Multi\obj\Debug\WeissChamberController.exe
 D:\02_Software\01_C#_Project\CSharpe-WeissControl\WeissChamberController-Multi\obj\Debug\WeissChamberController.pdb
+D:\01_Projects\00_C#\CSharpe-WeissControl\WeissChamberController-Multi\bin\Debug\WeissChamberController.exe.config
+D:\01_Projects\00_C#\CSharpe-WeissControl\WeissChamberController-Multi\bin\Debug\WeissChamberController.exe
+D:\01_Projects\00_C#\CSharpe-WeissControl\WeissChamberController-Multi\bin\Debug\WeissChamberController.pdb
+D:\01_Projects\00_C#\CSharpe-WeissControl\WeissChamberController-Multi\obj\Debug\WeissChamberController.csproj.AssemblyReference.cache
+D:\01_Projects\00_C#\CSharpe-WeissControl\WeissChamberController-Multi\obj\Debug\Form1.Form1.resources
+D:\01_Projects\00_C#\CSharpe-WeissControl\WeissChamberController-Multi\obj\Debug\WeissChamberController.Properties.Resources.resources
+D:\01_Projects\00_C#\CSharpe-WeissControl\WeissChamberController-Multi\obj\Debug\WeissChamberController.csproj.GenerateResource.cache
+D:\01_Projects\00_C#\CSharpe-WeissControl\WeissChamberController-Multi\obj\Debug\WeissChamberController.csproj.CoreCompileInputs.cache
+D:\01_Projects\00_C#\CSharpe-WeissControl\WeissChamberController-Multi\obj\Debug\WeissChamberController.exe
+D:\01_Projects\00_C#\CSharpe-WeissControl\WeissChamberController-Multi\obj\Debug\WeissChamberController.pdb
