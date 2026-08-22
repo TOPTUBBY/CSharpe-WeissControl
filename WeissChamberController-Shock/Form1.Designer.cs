@@ -65,6 +65,7 @@
             this.tbTempHotChamSet = new System.Windows.Forms.TextBox();
             this.btnSetCradPos = new System.Windows.Forms.Button();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
+            this.cmbLogFileMode = new System.Windows.Forms.ComboBox();
             this.btnBrowseLogPath = new System.Windows.Forms.Button();
             this.txtLogPath = new System.Windows.Forms.TextBox();
             this.label8 = new System.Windows.Forms.Label();
@@ -86,6 +87,7 @@
             this.pictureBox2 = new System.Windows.Forms.PictureBox();
             this.pbCradPos = new System.Windows.Forms.PictureBox();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
+            this.labelLogFileMode = new System.Windows.Forms.Label();
             this.grpComm.SuspendLayout();
             this.panel1.SuspendLayout();
             this.groupBox1.SuspendLayout();
@@ -289,12 +291,12 @@
             // 
             this.lblChamberStatus.AutoSize = true;
             this.lblChamberStatus.BackColor = System.Drawing.Color.LightGray;
-            this.lblChamberStatus.Font = new System.Drawing.Font("Noto Sans TC", 16.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblChamberStatus.Font = new System.Drawing.Font("Microsoft Sans Serif", 16.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblChamberStatus.ForeColor = System.Drawing.Color.Black;
             this.lblChamberStatus.Location = new System.Drawing.Point(611, 3);
             this.lblChamberStatus.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.lblChamberStatus.Name = "lblChamberStatus";
-            this.lblChamberStatus.Size = new System.Drawing.Size(57, 32);
+            this.lblChamberStatus.Size = new System.Drawing.Size(58, 26);
             this.lblChamberStatus.TabIndex = 6;
             this.lblChamberStatus.Text = "OFF";
             // 
@@ -581,6 +583,8 @@
             // groupBox3
             // 
             this.groupBox3.BackColor = System.Drawing.SystemColors.Control;
+            this.groupBox3.Controls.Add(this.cmbLogFileMode);
+            this.groupBox3.Controls.Add(this.labelLogFileMode);
             this.groupBox3.Controls.Add(this.btnBrowseLogPath);
             this.groupBox3.Controls.Add(this.txtLogPath);
             this.groupBox3.Controls.Add(this.label8);
@@ -592,14 +596,23 @@
             this.groupBox3.Size = new System.Drawing.Size(451, 87);
             this.groupBox3.TabIndex = 8;
             this.groupBox3.TabStop = false;
-            this.groupBox3.Text = "Logging";
+            this.groupBox3.Text = "Logging mode";
+            // 
+            // cmbLogFileMode
+            // 
+            this.cmbLogFileMode.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cmbLogFileMode.FormattingEnabled = true;
+            this.cmbLogFileMode.Location = new System.Drawing.Point(98, 19);
+            this.cmbLogFileMode.Name = "cmbLogFileMode";
+            this.cmbLogFileMode.Size = new System.Drawing.Size(79, 21);
+            this.cmbLogFileMode.TabIndex = 10;
             // 
             // btnBrowseLogPath
             // 
-            this.btnBrowseLogPath.Location = new System.Drawing.Point(16, 41);
+            this.btnBrowseLogPath.Location = new System.Drawing.Point(315, 13);
             this.btnBrowseLogPath.Margin = new System.Windows.Forms.Padding(2);
             this.btnBrowseLogPath.Name = "btnBrowseLogPath";
-            this.btnBrowseLogPath.Size = new System.Drawing.Size(88, 35);
+            this.btnBrowseLogPath.Size = new System.Drawing.Size(127, 34);
             this.btnBrowseLogPath.TabIndex = 5;
             this.btnBrowseLogPath.Text = "Browse";
             this.btnBrowseLogPath.UseVisualStyleBackColor = true;
@@ -608,15 +621,15 @@
             // txtLogPath
             // 
             this.txtLogPath.BackColor = System.Drawing.SystemColors.Window;
-            this.txtLogPath.Location = new System.Drawing.Point(148, 56);
+            this.txtLogPath.Location = new System.Drawing.Point(247, 57);
             this.txtLogPath.Name = "txtLogPath";
-            this.txtLogPath.Size = new System.Drawing.Size(297, 20);
+            this.txtLogPath.Size = new System.Drawing.Size(194, 20);
             this.txtLogPath.TabIndex = 7;
             // 
             // label8
             // 
             this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(85, 20);
+            this.label8.Location = new System.Drawing.Point(15, 61);
             this.label8.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label8.Name = "label8";
             this.label8.Size = new System.Drawing.Size(58, 13);
@@ -626,7 +639,7 @@
             // label9
             // 
             this.label9.AutoSize = true;
-            this.label9.Location = new System.Drawing.Point(108, 59);
+            this.label9.Location = new System.Drawing.Point(207, 61);
             this.label9.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label9.Name = "label9";
             this.label9.Size = new System.Drawing.Size(35, 13);
@@ -636,19 +649,20 @@
             // txtFileNamePrefix
             // 
             this.txtFileNamePrefix.BackColor = System.Drawing.SystemColors.Window;
-            this.txtFileNamePrefix.Location = new System.Drawing.Point(148, 17);
+            this.txtFileNamePrefix.Location = new System.Drawing.Point(78, 57);
             this.txtFileNamePrefix.Name = "txtFileNamePrefix";
-            this.txtFileNamePrefix.Size = new System.Drawing.Size(297, 20);
+            this.txtFileNamePrefix.Size = new System.Drawing.Size(124, 20);
             this.txtFileNamePrefix.TabIndex = 7;
             // 
             // chkCsvLogging
             // 
             this.chkCsvLogging.AutoSize = true;
-            this.chkCsvLogging.Location = new System.Drawing.Point(16, 19);
+            this.chkCsvLogging.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.chkCsvLogging.Location = new System.Drawing.Point(187, 21);
             this.chkCsvLogging.Name = "chkCsvLogging";
-            this.chkCsvLogging.Size = new System.Drawing.Size(64, 17);
+            this.chkCsvLogging.Size = new System.Drawing.Size(86, 17);
             this.chkCsvLogging.TabIndex = 6;
-            this.chkCsvLogging.Text = "Logging";
+            this.chkCsvLogging.Text = "Logging Sart";
             this.chkCsvLogging.UseVisualStyleBackColor = true;
             this.chkCsvLogging.CheckedChanged += new System.EventHandler(this.chkCsvLogging_CheckedChanged);
             // 
@@ -814,6 +828,15 @@
             this.pictureBox1.TabIndex = 14;
             this.pictureBox1.TabStop = false;
             // 
+            // labelLogFileMode
+            // 
+            this.labelLogFileMode.AutoSize = true;
+            this.labelLogFileMode.Location = new System.Drawing.Point(15, 22);
+            this.labelLogFileMode.Name = "labelLogFileMode";
+            this.labelLogFileMode.Size = new System.Drawing.Size(80, 13);
+            this.labelLogFileMode.TabIndex = 9;
+            this.labelLogFileMode.Text = "Logging mode :";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -829,7 +852,7 @@
             this.MaximizeBox = false;
             this.Name = "Form1";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "Weiss/Votsch Thermal Shock Monitoring - QE APEBU DELTA v1.0.04.2026 DET9-RD1";
+            this.Text = "Weiss/Votsch Thermal Shock Monitoring - DQT EVSBG DELTA v1.1.08.2026 DET9-RD1";
             this.Load += new System.EventHandler(this.Form1_Load);
             this.grpComm.ResumeLayout(false);
             this.grpComm.PerformLayout();
@@ -873,6 +896,7 @@
         private System.Windows.Forms.Panel panel2;
         private System.Windows.Forms.GroupBox groupBox1;
         private System.Windows.Forms.GroupBox groupBox3;
+        private System.Windows.Forms.ComboBox cmbLogFileMode;
         private System.Windows.Forms.Button btnBrowseLogPath;
         private System.Windows.Forms.Label label9;
         private System.Windows.Forms.TextBox txtLogPath;
@@ -915,5 +939,6 @@
         private System.Windows.Forms.TextBox tbTempCradSet;
         private System.Windows.Forms.Label label7;
         private System.Windows.Forms.PictureBox pictureBox6;
+        private System.Windows.Forms.Label labelLogFileMode;
     }
 }

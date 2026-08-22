@@ -29,12 +29,16 @@ namespace Form1
     public partial class Form1 : Form
     {
         private const string ProgramAuthor = "Patiphan Phakdeeburi.";
+        private const string LogHeader = "Timestamp,SetTemp,ActTemp,SetHumi,ActHumi,Status";
 
         // Chamber controller instance
         private WeissChamberController chamberController = new WeissChamberController();
 
         // Timer for automatic parameter retrieval
         private System.Windows.Forms.Timer tmrAutoGet;
+
+        // Timer for closing the current CSV and opening a new one at midnight
+        private System.Windows.Forms.Timer tmrLogRollover;
 
         // Used to cancel running tasks when disconnecting
         private CancellationTokenSource _cancellationTokenSource;
@@ -47,6 +51,7 @@ namespace Form1
 
         private StreamWriter _logWriter;
         private string _logFilePath;
+        private DateTime _logFileDate;
 
         // Stores the log directory path
         private string _logDirectoryPath;
@@ -101,6 +106,9 @@ namespace Form1
             tmrAutoGet = new System.Windows.Forms.Timer();
             tmrAutoGet.Tick += new EventHandler(tmrAutoGet_Tick);
             tmrAutoGet.Interval = 5000; // Default to 5 seconds
+
+            tmrLogRollover = new System.Windows.Forms.Timer();
+            tmrLogRollover.Tick += new EventHandler(tmrLogRollover_Tick);
         }
 
         /// <summary>
@@ -125,6 +133,10 @@ namespace Form1
 
             // Set default CSV file name prefix
             txtFileNamePrefix.Text = "TestChamberLog";
+
+            // Single file is the default; Daily file creates a new CSV at midnight
+            cmbLogFileMode.Items.AddRange(new object[] { "Single file", "Daily file" });
+            cmbLogFileMode.SelectedIndex = 0;
 
             // Set default log directory path
             //_logDirectoryPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Logs");
@@ -168,6 +180,7 @@ namespace Form1
                 txtFileNamePrefix.Enabled = logControlsEditable;
                 txtLogPath.Enabled = logControlsEditable;
                 btnBrowseLogPath.Enabled = logControlsEditable;
+                cmbLogFileMode.Enabled = logControlsEditable;
             }
             else
             {
@@ -181,6 +194,7 @@ namespace Form1
                 txtFileNamePrefix.Enabled = true;
                 txtLogPath.Enabled = true;
                 btnBrowseLogPath.Enabled = true;
+                cmbLogFileMode.Enabled = true;
             }
 
             // Update communication status label
@@ -203,11 +217,118 @@ namespace Form1
         }
 
         /// <summary>
+        /// Opens a new CSV file using the existing prefix/date/time naming format.
+        /// </summary>
+        private void OpenNewLogFile(DateTime fileTimestamp)
+        {
+            if (!Directory.Exists(_logDirectoryPath))
+                Directory.CreateDirectory(_logDirectoryPath);
+
+            string prefix = txtFileNamePrefix.Text.Trim();
+            string timestamp = fileTimestamp.ToString("yyyy-MM-dd_HH-mm-ss");
+            string fileName = $"CBLOG_{prefix}_{timestamp}.csv";
+            string newLogFilePath = Path.Combine(_logDirectoryPath, fileName);
+            StreamWriter newLogWriter = null;
+
+            try
+            {
+                newLogWriter = new StreamWriter(newLogFilePath, false);
+                newLogWriter.WriteLine(LogHeader);
+                newLogWriter.Flush();
+            }
+            catch
+            {
+                if (newLogWriter != null)
+                    newLogWriter.Dispose();
+                throw;
+            }
+
+            _logWriter = newLogWriter;
+            _logFilePath = newLogFilePath;
+            _logFileDate = fileTimestamp.Date;
+        }
+
+        /// <summary>
+        /// Schedules the next CSV rollover for local midnight.
+        /// </summary>
+        private void ScheduleNextLogRollover()
+        {
+            tmrLogRollover.Stop();
+            if (!_isLogging || !IsDailyLogFileMode())
+                return;
+
+            DateTime now = DateTime.Now;
+            double millisecondsUntilMidnight = (now.Date.AddDays(1) - now).TotalMilliseconds;
+            tmrLogRollover.Interval = Math.Max(1000, (int)Math.Ceiling(millisecondsUntilMidnight));
+            tmrLogRollover.Start();
+        }
+
+        private bool IsDailyLogFileMode()
+        {
+            return cmbLogFileMode.SelectedIndex == 1;
+        }
+
+        /// <summary>
+        /// Closes the previous day's CSV and immediately opens a new CSV.
+        /// </summary>
+        private void RotateLogFile(DateTime fileTimestamp)
+        {
+            if (!_isLogging)
+                return;
+
+            string previousLogFilePath = _logFilePath;
+
+            try
+            {
+                StreamWriter previousWriter = _logWriter;
+                _logWriter = null;
+                if (previousWriter != null)
+                    previousWriter.Dispose();
+
+                OpenNewLogFile(fileTimestamp);
+                ScheduleNextLogRollover();
+                txtErrStr.Text = $"New day detected. Previous file saved at: {previousLogFilePath}. CSV logging continued at: {_logFilePath}";
+            }
+            catch (Exception ex)
+            {
+                _isLogging = false;
+                tmrLogRollover.Stop();
+
+                if (_logWriter != null)
+                {
+                    _logWriter.Dispose();
+                    _logWriter = null;
+                }
+
+                if (chkCsvLogging.Checked)
+                    chkCsvLogging.Checked = false;
+
+                txtFileNamePrefix.Enabled = true;
+                txtLogPath.Enabled = true;
+                btnBrowseLogPath.Enabled = true;
+                cmbLogFileMode.Enabled = true;
+                txtErrStr.Text = $"Failed to create the new daily CSV file: {ex.Message}. Logging stopped.";
+            }
+        }
+
+        private void tmrLogRollover_Tick(object sender, EventArgs e)
+        {
+            tmrLogRollover.Stop();
+            DateTime now = DateTime.Now;
+
+            if (IsDailyLogFileMode() && now.Date != _logFileDate)
+                RotateLogFile(now);
+            else
+                ScheduleNextLogRollover();
+        }
+
+        /// <summary>
         /// Safely stops CSV logging and updates the UI.
         /// </summary>
         private void StopLogging()
         {
-            if (!_isLogging) return;
+            tmrLogRollover.Stop();
+            if (!_isLogging && _logWriter == null) return;
             _isLogging = false;
 
             if (_logWriter != null)
@@ -226,6 +347,7 @@ namespace Form1
                         txtFileNamePrefix.Enabled = true;
                         txtLogPath.Enabled = true;
                         btnBrowseLogPath.Enabled = true;
+                        cmbLogFileMode.Enabled = true;
                         txtErrStr.Text = $"CSV logging stopped. File saved at: {_logFilePath}";
                     };
 
@@ -252,7 +374,15 @@ namespace Form1
         {
             if (_isLogging && _logWriter != null)
             {
-                string timestamp = DateTime.Now.ToString("dd/MM/yyyy_HH:mm:ss");
+                DateTime logTimestamp = DateTime.Now;
+                if (IsDailyLogFileMode() && logTimestamp.Date != _logFileDate)
+                {
+                    RotateLogFile(logTimestamp);
+                    if (!_isLogging || _logWriter == null)
+                        return;
+                }
+
+                string timestamp = logTimestamp.ToString("dd/MM/yyyy_HH:mm:ss");
                 int enabledStatus = isEnabled ? 1 : 0;
                 string line = $"{timestamp},{tSet:0.0},{tCurr:0.0},{hSet:0.0},{hCurr:0.0},{enabledStatus}";
 
@@ -623,19 +753,15 @@ namespace Form1
                         txtErrStr.Text = $"Log path created: {_logDirectoryPath}";
                     }
 
-                    string timestamp = DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss");
-                    string fileName = $"CBLOG_{prefix}_{timestamp}.csv";
-                    _logFilePath = Path.Combine(_logDirectoryPath, fileName);
-
-                    _logWriter = new StreamWriter(_logFilePath, false);
-                    _logWriter.WriteLine("Timestamp,SetTemp,ActTemp,SetHumi,ActHumi,Status");
-                    _logWriter.Flush();
+                    OpenNewLogFile(DateTime.Now);
 
                     _isLogging = true;
+                    ScheduleNextLogRollover();
                     txtFileNamePrefix.Enabled = false;
                     txtLogPath.Enabled = false;
                     btnBrowseLogPath.Enabled = false;
-                    txtErrStr.Text = $"CSV logging started. File saved at: {_logFilePath}";
+                    cmbLogFileMode.Enabled = false;
+                    txtErrStr.Text = $"CSV logging started ({cmbLogFileMode.Text}). File saved at: {_logFilePath}";
                 }
                 catch (Exception ex)
                 {
@@ -643,9 +769,11 @@ namespace Form1
                     txtErrStr.Text = $"Failed to start logging: {ex.Message}";
                     chkCsvLogging.Checked = false;
                     _isLogging = false;
+                    tmrLogRollover.Stop();
                     txtFileNamePrefix.Enabled = true;
                     txtLogPath.Enabled = true;
                     btnBrowseLogPath.Enabled = true;
+                    cmbLogFileMode.Enabled = true;
                 }
             }
             else
