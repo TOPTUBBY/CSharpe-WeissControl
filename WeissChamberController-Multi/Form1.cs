@@ -43,13 +43,10 @@ namespace Form1
         // Stores the log directory path
         private string _logDirectoryPath;
 
-        private RealtimeGraphPanel _realtimeGraphPanel;
-        private Button _btnGraphTab;
-        private ToolTip _graphToolTip;
+        private RealtimeGraphController _realtimeGraphController;
         private bool _graphExpanded;
         private int _collapsedClientWidth;
-        private const int GraphTabWidth = 34;
-        private const int GraphPanelWidth = 720;
+        private int _expandedClientWidth;
 
         private bool _hasGraphReading;
         private double _latestTempSet;
@@ -64,6 +61,13 @@ namespace Form1
         public Form1()
         {
             InitializeComponent();
+
+            // Keep the expanded graph workspace visible while editing Form1 in
+            // the Visual Studio Designer. Runtime-only setup collapses it below.
+            if (System.ComponentModel.LicenseManager.UsageMode ==
+                System.ComponentModel.LicenseUsageMode.Designtime)
+                return;
+
             InitializeTimer();
             InitializeRealtimeGraph();
             InitializeCommControls();
@@ -113,51 +117,39 @@ namespace Form1
 
         private void InitializeRealtimeGraph()
         {
-            int originalWidth = ClientSize.Width;
-            _collapsedClientWidth = originalWidth + GraphTabWidth;
+            // The complete graph layout lives in Form1.Designer.cs so it can be
+            // edited visually. At runtime the form starts in its collapsed width.
+            _expandedClientWidth = ClientSize.Width;
+            _collapsedClientWidth = pnlGraphWorkspace.Left;
+
+            _realtimeGraphController = new RealtimeGraphController(
+                pnlGraphWorkspace,
+                chartRealtime,
+                dgvGraphValues,
+                cmbGraphTimeDiv,
+                chkGraphAutoFollow,
+                btnGraphResetView,
+                lblGraphProbe,
+                lblGraphSampling);
+
+            pnlGraphWorkspace.Visible = false;
             ClientSize = new System.Drawing.Size(_collapsedClientWidth, ClientSize.Height);
-
-            _btnGraphTab = new Button
-            {
-                Location = new System.Drawing.Point(originalWidth, 72),
-                Size = new System.Drawing.Size(GraphTabWidth, 142),
-                BackColor = System.Drawing.Color.FromArgb(9, 45, 112),
-                ForeColor = System.Drawing.Color.White,
-                FlatStyle = FlatStyle.Flat,
-                Font = new System.Drawing.Font(Font.FontFamily, 8F, System.Drawing.FontStyle.Bold),
-                Text = "G\r\nR\r\nA\r\nP\r\nH\r\n▶",
-                TabStop = false
-            };
-            _btnGraphTab.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(70, 130, 205);
-            _btnGraphTab.Click += btnGraphTab_Click;
-
-            _realtimeGraphPanel = new RealtimeGraphPanel
-            {
-                Location = new System.Drawing.Point(_collapsedClientWidth, 0),
-                Size = new System.Drawing.Size(GraphPanelWidth, ClientSize.Height),
-                Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left,
-                Visible = false
-            };
-
-            _graphToolTip = new ToolTip();
-            _graphToolTip.SetToolTip(_btnGraphTab, "Open or close the real-time graph workspace");
-
-            Controls.Add(_realtimeGraphPanel);
-            Controls.Add(_btnGraphTab);
-            _btnGraphTab.BringToFront();
+            btnGraphTab.BringToFront();
         }
 
         private void btnGraphTab_Click(object sender, EventArgs e)
         {
             _graphExpanded = !_graphExpanded;
             SuspendLayout();
-            _realtimeGraphPanel.Visible = _graphExpanded;
+            pnlGraphWorkspace.Visible = _graphExpanded;
             ClientSize = new System.Drawing.Size(
-                _collapsedClientWidth + (_graphExpanded ? GraphPanelWidth : 0),
+                _graphExpanded ? _expandedClientWidth : _collapsedClientWidth,
                 ClientSize.Height);
-            _btnGraphTab.Text = _graphExpanded
+            btnGraphTab.Text = _graphExpanded
                 ? "G\r\nR\r\nA\r\nP\r\nH\r\n◀"
                 : "G\r\nR\r\nA\r\nP\r\nH\r\n▶";
+            if (_graphExpanded)
+                _realtimeGraphController.RefreshNow();
             ResumeLayout(true);
         }
 
@@ -461,7 +453,7 @@ namespace Form1
                     _latestHumidityActual = hCurr;
                     _latestChamberStatus = isEnabled;
                     _hasGraphReading = true;
-                    _realtimeGraphPanel.AddSample(DateTime.Now, tSet, tCurr, hSet, hCurr, isEnabled);
+                    _realtimeGraphController.AddSample(DateTime.Now, tSet, tCurr, hSet, hCurr, isEnabled);
 
                     if (_isLogging)
                         LogCurrentParams(tSet, tCurr, hSet, hCurr, isEnabled);
@@ -705,7 +697,7 @@ namespace Form1
             if (!_hasGraphReading || chkAutoGet.Checked)
                 return;
 
-            _realtimeGraphPanel.AddSample(
+            _realtimeGraphController.AddSample(
                 DateTime.Now,
                 _latestTempSet,
                 _latestTempActual,
@@ -752,7 +744,7 @@ namespace Form1
             string samplingText = cmbSamplingRate.SelectedItem == null
                 ? "10s"
                 : cmbSamplingRate.SelectedItem.ToString();
-            _realtimeGraphPanel.SetSamplingMode(samplingText, chkAutoGet.Checked);
+            _realtimeGraphController.SetSamplingMode(samplingText, chkAutoGet.Checked);
         }
 
         private void btnBrowseLogPath_Click(object sender, EventArgs e)
@@ -895,8 +887,8 @@ namespace Form1
                 tmrGraphHold.Dispose();
             }
 
-            if (_graphToolTip != null)
-                _graphToolTip.Dispose();
+            if (_realtimeGraphController != null)
+                _realtimeGraphController.Dispose();
 
             base.OnFormClosed(e);
         }
