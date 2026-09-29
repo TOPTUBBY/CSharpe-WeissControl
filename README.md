@@ -9,7 +9,7 @@
 [![Language: C#](https://img.shields.io/badge/Language-C%23-239120?logo=csharp)](https://docs.microsoft.com/en-us/dotnet/csharp/)
 ![Framework: .NET Framework 4.5](https://img.shields.io/badge/Framework-.NET%204.5-512BD4.svg)
 [![Status: Active](https://img.shields.io/badge/Status-Active-brightgreen)](https://github.com/TOPTUBBY/CSharpe-WeissControl)
-![Version](https://img.shields.io/badge/Version-2.1.08.2026-red.svg)
+![Version](https://img.shields.io/badge/Version-3.0.09.2026-red.svg)
 
 </div>
 
@@ -26,6 +26,7 @@ A **robust C# application** for automated control and real-time monitoring of **
 | 🎮 **Real-time Control** | Direct chamber communication with live parameter adjustment |
 | 📊 **Data Logging** | Continuous monitoring and recording of all chamber metrics |
 | 🔄 **Single & Multi-Chamber** | Flexible implementations for different operational needs |
+| 📈 **Interactive Realtime Graph** | Pin-style graph workspace with zoom, pan, probe, selectable signals, and adjustable axes |
 | 🔗 **Serial Protocol** | Full Weiss/Votsch protocol compliance |
 | 💾 **Persistent Storage** | Complete audit trail of all operations |
 
@@ -49,10 +50,10 @@ CSharpe-WeissControl/
 
 ### Prerequisites
 
-✅ **.NET Framework** or **.NET Core** (C#)  
-✅ **Visual Studio 2019+** or compatible IDE  
-✅ **Hardware**: Connected Weiss/Votsch chamber unit  
-✅ **Connection**: Serial/COM port or appropriate interface  
+- ✅ **.NET Framework 4.5**
+- ✅ **Visual Studio 2019+** or compatible IDE
+- ✅ **Hardware**: Connected Weiss/Votsch chamber unit
+- ✅ **Connection**: Serial/COM port or appropriate interface
 
 ### Installation Steps
 
@@ -102,12 +103,65 @@ Use **`WeissChamberController`** when managing a single environmental chamber.
 
 Use **`WeissChamberController-Multi`** for controlling multiple chambers simultaneously.
 
+#### Main control window — graph collapsed
+
+<div align="center">
+  <img src="Assets/multi-realtime-graph-collapsed.png" width="607" alt="Weiss Chamber Controller Multi with graph workspace collapsed">
+</div>
+
+#### Realtime graph workspace — graph expanded
+
+<div align="center">
+  <img src="Assets/multi-realtime-graph-expanded.png" width="1200" alt="Weiss Chamber Controller Multi realtime graph workspace">
+</div>
+
 ```
 ✓ Synchronized operation
 ✓ Centralized monitoring
 ✓ Batch testing capabilities
 ✓ Load balancing
+✓ Interactive realtime graph workspace
 ```
+
+### 📈 Realtime Graph Workspace (`WeissChamberController-Multi`)
+
+The graph is implemented as a collapsible right-side workspace. Click the vertical **GRAPH ▶** tab to open it and **GRAPH ◀** to close it. The normal controller remains available on the left while the graph is open.
+
+#### Plotted signals
+
+| Signal | Display color | Value |
+|--------|---------------|-------|
+| **Temp Set** | Red | Temperature setpoint (°C) |
+| **Temp Actual** | Orange | Measured temperature (°C) |
+| **Humi Set** | Blue | Humidity setpoint (%RH) |
+| **Humi Actual** | Light blue | Measured humidity (%RH) |
+| **On/Off Status** | Black/gray | Chamber status on a separate status plot |
+
+Use the **Show** checkbox in the signal table to display or hide each series. The **X** and **Y** columns show the latest reading, or the selected probe reading after clicking the chart.
+
+#### Graph controls
+
+| Control | How to use |
+|---------|------------|
+| **Time/Div** | Select the time represented by each horizontal division. The graph uses 10 divisions: `10 s` shows 100 seconds, `30 s` shows 5 minutes, `1 min` shows 10 minutes, `5 min` shows 50 minutes, `10 min` shows 100 minutes, `30 min` shows 5 hours, `1 hr` shows 10 hours, and `6 hr`/`All (24 hr)` show up to 24 hours. |
+| **Auto Follow** | Keep the latest sample at the right side of the graph. It is disabled automatically when probing, zooming, or panning. |
+| **Reset View** | Clear probe/zoom positions, restore the selected Time/Div view, and enable Auto Follow. |
+| **Zoom Box** | Select this mode, then hold the left mouse button and drag a rectangle over the value plot. Both the time and value ranges are zoomed to the selected area. |
+| **Pan Hand** | Select this mode, then drag left or right to move through the available graph history. |
+| **Temp °C / Humi % + Apply Y** | Enter minimum and maximum values for both Y axes, then click **Apply Y** to fix the ranges. Each minimum must be lower than its maximum. |
+| **Auto Y** | Return the temperature and humidity Y axes to automatic scaling. |
+| **Point Probe** | In **Zoom Box** mode, click a point without dragging. The graph selects the nearest sample and shows its full timestamp, temperature, humidity, and status. |
+
+#### Sampling and history behavior
+
+- When **Autoget** is enabled, new graph samples use the same interval selected in the controller's **Sampling** list.
+- When **Autoget** is disabled, the graph continues at that interval by holding the last successfully read values.
+- The source and active sampling interval are shown in the top-right corner of the graph toolbar.
+- The graph retains up to 24 hours of history. In **All (24 hr)** mode, older data gradually fades toward the left side.
+- Rendering is automatically reduced for long histories to keep interaction responsive while retaining the newest point.
+- Up to 30,000 samples are stored and up to 4,000 representative samples are rendered at one time.
+
+> The realtime graph feature currently applies to **`WeissChamberController-Multi`** only. Thermal Shock graph support will be added after this implementation is stable.
 
 ### ⚡ Thermal Shock Chamber Mode
 
@@ -238,7 +292,7 @@ For questions or support: [TOPTUBBY](https://github.com/TOPTUBBY)
 | Aspect | Status |
 |--------|--------|
 | Development | 🟢 Active |
-| Latest Update | 🕐 August 20, 2026 |
+| Latest Update | 🕐 September 29, 2026 |
 | Stability | 🟢 Stable |
 | Production Ready | ✅ Yes |
 
@@ -248,6 +302,11 @@ For questions or support: [TOPTUBBY](https://github.com/TOPTUBBY)
 
 | Version | Date | Notes |
 |---------|------|-------|
+| **v3.0.09.2026** | 2026-09-29 | 📈 Added a collapsible realtime graph workspace to `WeissChamberController-Multi` with Temp Set/Actual, Humi Set/Actual, and On/Off Status signals |
+| | | 🖱️ Added point probe, rectangle zoom, Pan Hand, Auto Follow, and Reset View controls |
+| | | 📐 Added fixed Temp/Humidity Y-axis ranges with Apply Y and automatic scaling with Auto Y |
+| | | ⏱️ Added Time/Div selections from 10 seconds through All (24 hours), sampling linked to Autoget, hold-last-value mode, long-history fading, and rendering decimation |
+| | | 🎨 Moved the complete graph workspace layout into the WinForms Designer and refined the fixed-window layout, timestamps, legends, and value table |
 | **v1.1.08.2026** | 2026-08-20 | 🎉 Added logging mode function for WeissChamberController |
 | **v1.1.08.2026** | 2026-08-20 | 🎉 Added logging mode function for WeissChamberController-Multi |
 | **v2.1.08.2026** | 2026-08-20 | 🎉 Added logging mode function for WeissChamberController-Shock |
