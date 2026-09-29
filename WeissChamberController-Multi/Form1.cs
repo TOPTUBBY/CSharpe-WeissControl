@@ -129,6 +129,14 @@ namespace Form1
                 cmbGraphTimeDiv,
                 chkGraphAutoFollow,
                 btnGraphResetView,
+                cmbGraphMouseMode,
+                txtGraphTempMin,
+                txtGraphTempMax,
+                txtGraphHumiMin,
+                txtGraphHumiMax,
+                btnGraphApplyY,
+                btnGraphAutoY,
+                lblGraphMouseHint,
                 lblGraphProbe,
                 lblGraphSampling);
 

@@ -25,6 +25,14 @@ namespace Form1
         private readonly ComboBox _timeDivCombo;
         private readonly CheckBox _autoFollowCheck;
         private readonly Button _resetButton;
+        private readonly ComboBox _mouseModeCombo;
+        private readonly TextBox _tempMinText;
+        private readonly TextBox _tempMaxText;
+        private readonly TextBox _humidityMinText;
+        private readonly TextBox _humidityMaxText;
+        private readonly Button _applyYButton;
+        private readonly Button _autoYButton;
+        private readonly Label _mouseHintLabel;
         private readonly Label _probeLabel;
         private readonly Label _samplingLabel;
         private readonly Timer _renderTimer;
@@ -34,6 +42,11 @@ namespace Form1
         private bool _updatingGrid;
         private bool _disposed;
         private Point _mouseDownPoint;
+        private Rectangle _selectionRectangle;
+        private bool _dragging;
+        private bool _selectionFrameVisible;
+        private double _panStartMinimum;
+        private double _panStartMaximum;
         private DateTime? _probeTime;
 
         internal RealtimeGraphController(
@@ -43,6 +56,14 @@ namespace Form1
             ComboBox timeDivCombo,
             CheckBox autoFollowCheck,
             Button resetButton,
+            ComboBox mouseModeCombo,
+            TextBox tempMinText,
+            TextBox tempMaxText,
+            TextBox humidityMinText,
+            TextBox humidityMaxText,
+            Button applyYButton,
+            Button autoYButton,
+            Label mouseHintLabel,
             Label probeLabel,
             Label samplingLabel)
         {
@@ -52,6 +73,14 @@ namespace Form1
             _timeDivCombo = timeDivCombo;
             _autoFollowCheck = autoFollowCheck;
             _resetButton = resetButton;
+            _mouseModeCombo = mouseModeCombo;
+            _tempMinText = tempMinText;
+            _tempMaxText = tempMaxText;
+            _humidityMinText = humidityMinText;
+            _humidityMaxText = humidityMaxText;
+            _applyYButton = applyYButton;
+            _autoYButton = autoYButton;
+            _mouseHintLabel = mouseHintLabel;
             _probeLabel = probeLabel;
             _samplingLabel = samplingLabel;
 
@@ -62,16 +91,23 @@ namespace Form1
                 ConfigureInteractiveArea(area);
 
             _chart.MouseDown += Chart_MouseDown;
+            _chart.MouseMove += Chart_MouseMove;
             _chart.MouseUp += Chart_MouseUp;
             _timeDivCombo.SelectedIndexChanged += TimeDivCombo_SelectedIndexChanged;
             _autoFollowCheck.CheckedChanged += AutoFollowCheck_CheckedChanged;
             _resetButton.Click += ResetButton_Click;
+            _mouseModeCombo.SelectedIndexChanged += MouseModeCombo_SelectedIndexChanged;
+            _applyYButton.Click += ApplyYButton_Click;
+            _autoYButton.Click += AutoYButton_Click;
             _valueGrid.CellValueChanged += ValueGrid_CellValueChanged;
             _valueGrid.CurrentCellDirtyStateChanged += ValueGrid_CurrentCellDirtyStateChanged;
 
             PopulateValueGrid();
             if (_timeDivCombo.SelectedIndex < 0 && _timeDivCombo.Items.Count > 0)
                 _timeDivCombo.SelectedIndex = _timeDivCombo.Items.Count - 1;
+            if (_mouseModeCombo.SelectedIndex < 0 && _mouseModeCombo.Items.Count > 0)
+                _mouseModeCombo.SelectedIndex = 0;
+            UpdateMouseModeUi();
 
             _renderTimer = new Timer { Interval = 200 };
             _renderTimer.Tick += RenderTimer_Tick;
@@ -126,10 +162,14 @@ namespace Form1
             _renderTimer.Tick -= RenderTimer_Tick;
             _renderTimer.Dispose();
             _chart.MouseDown -= Chart_MouseDown;
+            _chart.MouseMove -= Chart_MouseMove;
             _chart.MouseUp -= Chart_MouseUp;
             _timeDivCombo.SelectedIndexChanged -= TimeDivCombo_SelectedIndexChanged;
             _autoFollowCheck.CheckedChanged -= AutoFollowCheck_CheckedChanged;
             _resetButton.Click -= ResetButton_Click;
+            _mouseModeCombo.SelectedIndexChanged -= MouseModeCombo_SelectedIndexChanged;
+            _applyYButton.Click -= ApplyYButton_Click;
+            _autoYButton.Click -= AutoYButton_Click;
             _valueGrid.CellValueChanged -= ValueGrid_CellValueChanged;
             _valueGrid.CurrentCellDirtyStateChanged -= ValueGrid_CurrentCellDirtyStateChanged;
         }
@@ -137,12 +177,12 @@ namespace Form1
         private static void ConfigureInteractiveArea(ChartArea area)
         {
             area.CursorX.IsUserEnabled = true;
-            area.CursorX.IsUserSelectionEnabled = true;
+            area.CursorX.IsUserSelectionEnabled = false;
             area.CursorX.SelectionColor = Color.FromArgb(80, 25, 115, 220);
             area.CursorX.LineColor = Color.FromArgb(40, 55, 75);
             area.CursorX.LineDashStyle = ChartDashStyle.Dash;
             area.CursorY.IsUserEnabled = true;
-            area.CursorY.IsUserSelectionEnabled = true;
+            area.CursorY.IsUserSelectionEnabled = false;
             area.CursorY.SelectionColor = Color.FromArgb(55, 25, 115, 220);
             area.CursorY.LineColor = Color.FromArgb(40, 55, 75);
             area.CursorY.LineDashStyle = ChartDashStyle.Dash;
@@ -194,21 +234,25 @@ namespace Form1
             TimeSpan visibleSpan = GetVisibleSpan();
             DateTime visibleStart = latest.Timestamp - visibleSpan;
             DateTime visibleEnd = latest.Timestamp;
-            int firstIndex = FindFirstIndexAtOrAfter(visibleStart);
-            int visibleCount = _samples.Count - firstIndex;
-            int step = Math.Max(1, (int)Math.Ceiling(visibleCount / (double)MaxRenderedSamples));
+            DateTime historyStart = latest.Timestamp - MaximumHistory;
+            int firstIndex = FindFirstIndexAtOrAfter(historyStart);
+            int historyCount = _samples.Count - firstIndex;
+            int step = Math.Max(1, (int)Math.Ceiling(historyCount / (double)MaxRenderedSamples));
+            DateTime axisStart = _samples[firstIndex].Timestamp < visibleStart
+                ? _samples[firstIndex].Timestamp
+                : visibleStart;
 
             foreach (Series series in _chart.Series)
                 series.Points.Clear();
             for (int i = firstIndex; i < _samples.Count; i += step)
-                AppendRenderedPoint(_samples[i], visibleStart, visibleEnd, visibleSpan == MaximumHistory);
+                AppendRenderedPoint(_samples[i], axisStart, visibleEnd, visibleSpan == MaximumHistory);
             if ((_samples.Count - 1 - firstIndex) % step != 0)
-                AppendRenderedPoint(latest, visibleStart, visibleEnd, visibleSpan == MaximumHistory);
+                AppendRenderedPoint(latest, axisStart, visibleEnd, visibleSpan == MaximumHistory);
 
             ChartArea valuesArea = _chart.ChartAreas["Values"];
             ChartArea statusArea = _chart.ChartAreas["Status"];
-            ConfigureTimeView(valuesArea, visibleStart, visibleEnd, visibleSpan);
-            ConfigureTimeView(statusArea, visibleStart, visibleEnd, visibleSpan);
+            ConfigureTimeView(valuesArea, axisStart, visibleStart, visibleEnd, visibleSpan);
+            ConfigureTimeView(statusArea, axisStart, visibleStart, visibleEnd, visibleSpan);
             if (_probeTime.HasValue)
             {
                 double probeX = _probeTime.Value.ToOADate();
@@ -248,18 +292,58 @@ namespace Form1
             return Color.FromArgb(red, green, blue);
         }
 
-        private void ConfigureTimeView(ChartArea area, DateTime start, DateTime end, TimeSpan span)
+        private void ConfigureTimeView(ChartArea area, DateTime dataStart, DateTime viewStart,
+            DateTime end, TimeSpan span)
         {
             Axis axis = area.AxisX;
-            axis.LabelStyle.Format = span.TotalHours >= 12 ? "dd/MM HH:mm" : "HH:mm:ss";
-            axis.IntervalType = span.TotalHours >= 2 ? DateTimeIntervalType.Hours : DateTimeIntervalType.Minutes;
-            axis.Interval = span.TotalHours >= 2
-                ? Math.Max(1.0, span.TotalHours / 10.0)
-                : Math.Max(0.1, span.TotalMinutes / 10.0);
-            if (_autoFollowCheck.Checked && !axis.ScaleView.IsZoomed)
+            bool preserveView = !_autoFollowCheck.Checked && axis.ScaleView.IsZoomed;
+            double preservedMinimum = preserveView ? axis.ScaleView.ViewMinimum : double.NaN;
+            double preservedMaximum = preserveView ? axis.ScaleView.ViewMaximum : double.NaN;
+            axis.IsMarginVisible = false;
+            axis.LabelStyle.Angle = 0;
+            axis.LabelStyle.IsEndLabelVisible = false;
+
+            if (span.TotalMinutes <= 10)
             {
-                axis.Minimum = start.ToOADate();
-                axis.Maximum = Math.Max(start.AddSeconds(1).ToOADate(), end.ToOADate());
+                axis.LabelStyle.Format = "HH:mm:ss";
+                axis.IntervalType = DateTimeIntervalType.Seconds;
+                axis.Interval = Math.Max(1.0, Math.Ceiling(span.TotalSeconds / 5.0));
+            }
+            else if (span.TotalHours <= 6)
+            {
+                axis.LabelStyle.Format = "HH:mm";
+                axis.IntervalType = DateTimeIntervalType.Minutes;
+                axis.Interval = Math.Max(1.0, Math.Ceiling(span.TotalMinutes / 5.0));
+            }
+            else
+            {
+                axis.LabelStyle.Format = span.TotalHours >= 24 ? "dd/MM HH:mm" : "HH:mm";
+                axis.IntervalType = DateTimeIntervalType.Hours;
+                axis.Interval = Math.Max(1.0, Math.Ceiling(span.TotalHours / 5.0));
+            }
+
+            axis.ScaleView.ZoomReset(0);
+            double dataMinimum = dataStart.ToOADate();
+            double dataMaximum = Math.Max(dataStart.AddSeconds(1).ToOADate(), end.ToOADate());
+            axis.Minimum = dataMinimum;
+            axis.Maximum = dataMaximum;
+            if (_autoFollowCheck.Checked)
+            {
+                if (viewStart > dataStart)
+                    axis.ScaleView.Zoom(viewStart.ToOADate(), end.ToOADate());
+            }
+            else if (preserveView)
+            {
+                double viewWidth = preservedMaximum - preservedMinimum;
+                double minimum = Math.Max(dataMinimum, preservedMinimum);
+                double maximum = minimum + viewWidth;
+                if (maximum > dataMaximum)
+                {
+                    maximum = dataMaximum;
+                    minimum = Math.Max(dataMinimum, maximum - viewWidth);
+                }
+                if (maximum > minimum)
+                    axis.ScaleView.Zoom(minimum, maximum);
             }
         }
 
@@ -270,7 +354,9 @@ namespace Form1
             _updatingGrid = true;
             try
             {
-                string x = sample.Timestamp.ToString("HH:mm:ss.fff", CultureInfo.InvariantCulture);
+                // Milliseconds stay available in the probe details, while the
+                // compact table uses seconds so the fixed-width columns stay tidy.
+                string x = sample.Timestamp.ToString("HH:mm:ss", CultureInfo.InvariantCulture);
                 SetGridValue(0, x, sample.TempSet.ToString("0.0", CultureInfo.InvariantCulture) + " °C");
                 SetGridValue(1, x, sample.TempActual.ToString("0.0", CultureInfo.InvariantCulture) + " °C");
                 SetGridValue(2, x, sample.HumiditySet.ToString("0.0", CultureInfo.InvariantCulture) + " %RH");
@@ -281,7 +367,7 @@ namespace Form1
                       "\r\nT " + sample.TempActual.ToString("0.0", CultureInfo.InvariantCulture) + " °C  |  H " +
                       sample.HumidityActual.ToString("0.0", CultureInfo.InvariantCulture) + " %RH  |  " +
                       (sample.Status >= 0.5 ? "ON" : "OFF")
-                    : "Latest: " + sample.Timestamp.ToString("dd/MM/yyyy HH:mm:ss.fff", CultureInfo.InvariantCulture) +
+                    : "Latest: " + sample.Timestamp.ToString("dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture) +
                       "\r\nClick the graph to probe a point.";
             }
             finally
@@ -298,27 +384,97 @@ namespace Form1
 
         private void Chart_MouseDown(object sender, MouseEventArgs e)
         {
-            if (e.Button == MouseButtons.Left)
-                _mouseDownPoint = e.Location;
+            if (e.Button != MouseButtons.Left || _samples.Count == 0)
+                return;
+
+            Rectangle plotRectangle = GetValuesPlotRectangle();
+            if (!plotRectangle.Contains(e.Location))
+                return;
+
+            _mouseDownPoint = e.Location;
+            _dragging = true;
+            _chart.Capture = true;
+
+            if (IsPanMode())
+            {
+                Axis axis = _chart.ChartAreas["Values"].AxisX;
+                try
+                {
+                    _panStartMinimum = axis.ScaleView.ViewMinimum;
+                    _panStartMaximum = axis.ScaleView.ViewMaximum;
+                }
+                catch (ArgumentException)
+                {
+                    _dragging = false;
+                    _chart.Capture = false;
+                }
+            }
+            else
+            {
+                _selectionRectangle = new Rectangle(e.Location, Size.Empty);
+            }
+        }
+
+        private void Chart_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (!_dragging)
+                return;
+
+            if (IsPanMode())
+            {
+                PanChart(e.X);
+                return;
+            }
+
+            if (_selectionFrameVisible)
+                ToggleSelectionFrame();
+
+            Point current = ClampToRectangle(e.Location, GetValuesPlotRectangle());
+            _selectionRectangle = NormalizeRectangle(_mouseDownPoint, current);
+            if (_selectionRectangle.Width > 1 && _selectionRectangle.Height > 1)
+            {
+                ToggleSelectionFrame();
+                _selectionFrameVisible = true;
+            }
         }
 
         private void Chart_MouseUp(object sender, MouseEventArgs e)
         {
-            if (e.Button != MouseButtons.Left || _samples.Count == 0)
+            if (e.Button != MouseButtons.Left || !_dragging)
                 return;
-            int delta = Math.Abs(e.X - _mouseDownPoint.X) + Math.Abs(e.Y - _mouseDownPoint.Y);
-            if (delta > 6)
+
+            _dragging = false;
+            _chart.Capture = false;
+
+            if (IsPanMode())
             {
-                _autoFollowCheck.Checked = false;
-                _probeLabel.Text = "Zoomed view\r\nUse Reset View to return to the normal axes.";
+                _probeLabel.Text = "Pan view\r\nDrag again or use Reset View / Auto Follow.";
                 return;
             }
 
-            HitTestResult hit = _chart.HitTest(e.X, e.Y);
-            ChartArea area = hit.ChartArea ?? _chart.ChartAreas["Values"];
+            if (_selectionFrameVisible)
+            {
+                ToggleSelectionFrame();
+                _selectionFrameVisible = false;
+            }
+
+            if (_selectionRectangle.Width >= 8 && _selectionRectangle.Height >= 8)
+            {
+                ApplyRectangleZoom(_selectionRectangle);
+                _selectionRectangle = Rectangle.Empty;
+                return;
+            }
+
+            ProbeAt(e.Location);
+            _selectionRectangle = Rectangle.Empty;
+        }
+
+        private void ProbeAt(Point location)
+        {
+            ChartArea area = _chart.ChartAreas["Values"];
             try
             {
-                DateTime clickedTime = DateTime.FromOADate(area.AxisX.PixelPositionToValue(e.X));
+                DateTime clickedTime = DateTime.FromOADate(area.AxisX.PixelPositionToValue(location.X));
                 GraphSample nearest = FindNearestSample(clickedTime);
                 _autoFollowCheck.Checked = false;
                 _probeTime = nearest.Timestamp;
@@ -333,10 +489,209 @@ namespace Form1
             }
         }
 
+        private void ApplyRectangleZoom(Rectangle rectangle)
+        {
+            ChartArea valuesArea = _chart.ChartAreas["Values"];
+            try
+            {
+                double x1 = valuesArea.AxisX.PixelPositionToValue(rectangle.Left);
+                double x2 = valuesArea.AxisX.PixelPositionToValue(rectangle.Right);
+                double y1 = valuesArea.AxisY.PixelPositionToValue(rectangle.Bottom);
+                double y2 = valuesArea.AxisY.PixelPositionToValue(rectangle.Top);
+                double y21 = valuesArea.AxisY2.PixelPositionToValue(rectangle.Bottom);
+                double y22 = valuesArea.AxisY2.PixelPositionToValue(rectangle.Top);
+
+                ApplyXZoom(Math.Min(x1, x2), Math.Max(x1, x2));
+                valuesArea.AxisY.ScaleView.Zoom(Math.Min(y1, y2), Math.Max(y1, y2));
+                valuesArea.AxisY2.ScaleView.Zoom(Math.Min(y21, y22), Math.Max(y21, y22));
+                _autoFollowCheck.Checked = false;
+                _probeTime = null;
+                _probeLabel.Text = "Rectangle zoom active\r\nChoose Pan Hand to move, or Reset View to restore.";
+                _chart.Invalidate();
+            }
+            catch (ArgumentException)
+            {
+                _probeLabel.Text = "Zoom area is outside the graph plot.";
+            }
+        }
+
+        private void PanChart(int mouseX)
+        {
+            ChartArea valuesArea = _chart.ChartAreas["Values"];
+            Axis axis = valuesArea.AxisX;
+            try
+            {
+                double viewWidth = _panStartMaximum - _panStartMinimum;
+                double delta = (_mouseDownPoint.X - mouseX) * viewWidth /
+                    Math.Max(1.0, GetValuesPlotRectangle().Width);
+                double minimum = _panStartMinimum + delta;
+                double maximum = _panStartMaximum + delta;
+                double dataMinimum = axis.Minimum;
+                double dataMaximum = axis.Maximum;
+
+                if (minimum < dataMinimum)
+                {
+                    minimum = dataMinimum;
+                    maximum = minimum + viewWidth;
+                }
+                if (maximum > dataMaximum)
+                {
+                    maximum = dataMaximum;
+                    minimum = maximum - viewWidth;
+                }
+
+                _autoFollowCheck.Checked = false;
+                ApplyXZoom(minimum, maximum);
+                _chart.Invalidate();
+            }
+            catch (ArgumentException)
+            {
+                // Ignore a drag that leaves the plotting area.
+            }
+        }
+
+        private void ApplyXZoom(double minimum, double maximum)
+        {
+            if (double.IsNaN(minimum) || double.IsNaN(maximum) ||
+                double.IsInfinity(minimum) || double.IsInfinity(maximum) || maximum <= minimum)
+                return;
+
+            foreach (ChartArea area in _chart.ChartAreas)
+                area.AxisX.ScaleView.Zoom(minimum, maximum);
+        }
+
+        private Rectangle GetValuesPlotRectangle()
+        {
+            ChartArea area = _chart.ChartAreas["Values"];
+            ElementPosition outer = area.Position;
+            ElementPosition inner = area.InnerPlotPosition;
+            int x = (int)Math.Round(_chart.ClientSize.Width *
+                (outer.X + (outer.Width * inner.X / 100F)) / 100F);
+            int y = (int)Math.Round(_chart.ClientSize.Height *
+                (outer.Y + (outer.Height * inner.Y / 100F)) / 100F);
+            int width = (int)Math.Round(_chart.ClientSize.Width *
+                (outer.Width * inner.Width / 100F) / 100F);
+            int height = (int)Math.Round(_chart.ClientSize.Height *
+                (outer.Height * inner.Height / 100F) / 100F);
+            return new Rectangle(x, y, Math.Max(1, width), Math.Max(1, height));
+        }
+
+        private static Point ClampToRectangle(Point point, Rectangle bounds)
+        {
+            return new Point(
+                Math.Max(bounds.Left, Math.Min(bounds.Right - 1, point.X)),
+                Math.Max(bounds.Top, Math.Min(bounds.Bottom - 1, point.Y)));
+        }
+
+        private static Rectangle NormalizeRectangle(Point first, Point second)
+        {
+            return Rectangle.FromLTRB(
+                Math.Min(first.X, second.X),
+                Math.Min(first.Y, second.Y),
+                Math.Max(first.X, second.X),
+                Math.Max(first.Y, second.Y));
+        }
+
+        private void ToggleSelectionFrame()
+        {
+            Rectangle screenRectangle = _chart.RectangleToScreen(_selectionRectangle);
+            ControlPaint.DrawReversibleFrame(screenRectangle, Color.Black, FrameStyle.Dashed);
+        }
+
         private void TimeDivCombo_SelectedIndexChanged(object sender, EventArgs e)
         {
             ResetView(true);
             _chartDirty = true;
+        }
+
+        private void MouseModeCombo_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (_selectionFrameVisible)
+            {
+                ToggleSelectionFrame();
+                _selectionFrameVisible = false;
+            }
+            _dragging = false;
+            _selectionRectangle = Rectangle.Empty;
+            UpdateMouseModeUi();
+        }
+
+        private bool IsPanMode()
+        {
+            return _mouseModeCombo.SelectedIndex == 1;
+        }
+
+        private void UpdateMouseModeUi()
+        {
+            bool panMode = IsPanMode();
+            _chart.Cursor = panMode ? Cursors.Hand : Cursors.Cross;
+            _mouseHintLabel.Text = panMode
+                ? "Drag: move graph"
+                : "Drag: rectangle zoom";
+            _probeLabel.Text = panMode
+                ? "Pan Hand: drag left or right to move through history."
+                : "Zoom Box: drag a rectangle, or click to probe a point.";
+        }
+
+        private void ApplyYButton_Click(object sender, EventArgs e)
+        {
+            double tempMinimum;
+            double tempMaximum;
+            double humidityMinimum;
+            double humidityMaximum;
+            if (!TryParseAxisValue(_tempMinText.Text, out tempMinimum) ||
+                !TryParseAxisValue(_tempMaxText.Text, out tempMaximum) ||
+                !TryParseAxisValue(_humidityMinText.Text, out humidityMinimum) ||
+                !TryParseAxisValue(_humidityMaxText.Text, out humidityMaximum))
+            {
+                _probeLabel.Text = "Y axis error: enter numeric Min/Max values.";
+                return;
+            }
+
+            if (tempMinimum >= tempMaximum || humidityMinimum >= humidityMaximum)
+            {
+                _probeLabel.Text = "Y axis error: each Min value must be lower than Max.";
+                return;
+            }
+
+            ChartArea area = _chart.ChartAreas["Values"];
+            area.AxisY.ScaleView.ZoomReset(0);
+            area.AxisY2.ScaleView.ZoomReset(0);
+            area.AxisY.Minimum = double.NaN;
+            area.AxisY.Maximum = double.NaN;
+            area.AxisY2.Minimum = double.NaN;
+            area.AxisY2.Maximum = double.NaN;
+            area.AxisY.Minimum = tempMinimum;
+            area.AxisY.Maximum = tempMaximum;
+            area.AxisY.Interval = 0D;
+            area.AxisY2.Minimum = humidityMinimum;
+            area.AxisY2.Maximum = humidityMaximum;
+            area.AxisY2.Interval = 0D;
+            _probeLabel.Text = string.Format(CultureInfo.InvariantCulture,
+                "Y axes fixed\r\nTemp {0:0.##}…{1:0.##} °C | Humi {2:0.##}…{3:0.##} %RH",
+                tempMinimum, tempMaximum, humidityMinimum, humidityMaximum);
+            _chart.Invalidate();
+        }
+
+        private void AutoYButton_Click(object sender, EventArgs e)
+        {
+            ChartArea area = _chart.ChartAreas["Values"];
+            area.AxisY.ScaleView.ZoomReset(0);
+            area.AxisY2.ScaleView.ZoomReset(0);
+            area.AxisY.Minimum = double.NaN;
+            area.AxisY.Maximum = double.NaN;
+            area.AxisY.Interval = 0D;
+            area.AxisY2.Minimum = double.NaN;
+            area.AxisY2.Maximum = double.NaN;
+            area.AxisY2.Interval = 0D;
+            _probeLabel.Text = "Y Auto enabled\r\nTemperature and humidity axes follow visible data.";
+            _chart.Invalidate();
+        }
+
+        private static bool TryParseAxisValue(string text, out double value)
+        {
+            return double.TryParse(text, NumberStyles.Float, CultureInfo.CurrentCulture, out value) ||
+                   double.TryParse(text, NumberStyles.Float, CultureInfo.InvariantCulture, out value);
         }
 
         private void AutoFollowCheck_CheckedChanged(object sender, EventArgs e)

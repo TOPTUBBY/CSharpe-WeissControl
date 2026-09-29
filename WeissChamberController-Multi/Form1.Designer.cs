@@ -102,6 +102,19 @@
             this.chkGraphAutoFollow = new System.Windows.Forms.CheckBox();
             this.btnGraphResetView = new System.Windows.Forms.Button();
             this.lblGraphSampling = new System.Windows.Forms.Label();
+            this.lblGraphMouseMode = new System.Windows.Forms.Label();
+            this.cmbGraphMouseMode = new System.Windows.Forms.ComboBox();
+            this.lblGraphTempRange = new System.Windows.Forms.Label();
+            this.txtGraphTempMin = new System.Windows.Forms.TextBox();
+            this.lblGraphTempTo = new System.Windows.Forms.Label();
+            this.txtGraphTempMax = new System.Windows.Forms.TextBox();
+            this.lblGraphHumiRange = new System.Windows.Forms.Label();
+            this.txtGraphHumiMin = new System.Windows.Forms.TextBox();
+            this.lblGraphHumiTo = new System.Windows.Forms.Label();
+            this.txtGraphHumiMax = new System.Windows.Forms.TextBox();
+            this.btnGraphApplyY = new System.Windows.Forms.Button();
+            this.btnGraphAutoY = new System.Windows.Forms.Button();
+            this.lblGraphMouseHint = new System.Windows.Forms.Label();
             this.toolTipGraph = new System.Windows.Forms.ToolTip(this.components);
             this.grpComm.SuspendLayout();
             this.grpControl.SuspendLayout();
@@ -698,7 +711,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.splitGraphWorkspace.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(210)))), ((int)(((byte)(219)))), ((int)(((byte)(232)))));
             this.splitGraphWorkspace.FixedPanel = System.Windows.Forms.FixedPanel.Panel2;
-            this.splitGraphWorkspace.Location = new System.Drawing.Point(0, 36);
+            this.splitGraphWorkspace.Location = new System.Drawing.Point(0, 64);
             this.splitGraphWorkspace.Name = "splitGraphWorkspace";
             //
             // splitGraphWorkspace.Panel1
@@ -715,7 +728,7 @@
             this.splitGraphWorkspace.Panel2.Controls.Add(this.lblGraphProbe);
             this.splitGraphWorkspace.Panel2.Padding = new System.Windows.Forms.Padding(2, 4, 6, 6);
             this.splitGraphWorkspace.Panel2MinSize = 180;
-            this.splitGraphWorkspace.Size = new System.Drawing.Size(718, 355);
+            this.splitGraphWorkspace.Size = new System.Drawing.Size(718, 327);
             this.splitGraphWorkspace.SplitterDistance = 496;
             this.splitGraphWorkspace.SplitterWidth = 4;
             this.splitGraphWorkspace.TabIndex = 1;
@@ -729,11 +742,13 @@
             this.chartRealtime.BorderlineWidth = 1;
             chartArea1.AxisX.LabelStyle.Enabled = false;
             chartArea1.AxisX.LabelStyle.Format = "HH:mm:ss";
+            chartArea1.AxisX.LabelStyle.IsEndLabelVisible = false;
             chartArea1.AxisX.LineColor = System.Drawing.Color.FromArgb(((int)(((byte)(120)))), ((int)(((byte)(130)))), ((int)(((byte)(145)))));
             chartArea1.AxisX.MajorGrid.LineColor = System.Drawing.Color.FromArgb(((int)(((byte)(228)))), ((int)(((byte)(232)))), ((int)(((byte)(240)))));
             chartArea1.AxisX.ScaleView.Zoomable = true;
             chartArea1.AxisX.ScrollBar.ButtonStyle = System.Windows.Forms.DataVisualization.Charting.ScrollBarButtonStyles.SmallScroll;
             chartArea1.AxisX.ScrollBar.Enabled = true;
+            chartArea1.AxisX.Title = "";
             chartArea1.AxisY.IsStartedFromZero = false;
             chartArea1.AxisY.LabelStyle.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(90)))), ((int)(((byte)(35)))), ((int)(((byte)(35)))));
             chartArea1.AxisY.LineColor = System.Drawing.Color.FromArgb(((int)(((byte)(120)))), ((int)(((byte)(130)))), ((int)(((byte)(145)))));
@@ -749,23 +764,25 @@
             chartArea1.AxisY2.Title = "Humidity (%RH)";
             chartArea1.BackColor = System.Drawing.Color.White;
             chartArea1.InnerPlotPosition.Auto = false;
-            chartArea1.InnerPlotPosition.Height = 82F;
-            chartArea1.InnerPlotPosition.Width = 82F;
-            chartArea1.InnerPlotPosition.X = 10F;
-            chartArea1.InnerPlotPosition.Y = 7F;
+            chartArea1.InnerPlotPosition.Height = 90F;
+            chartArea1.InnerPlotPosition.Width = 76F;
+            chartArea1.InnerPlotPosition.X = 12F;
+            chartArea1.InnerPlotPosition.Y = 4F;
             chartArea1.Name = "Values";
             chartArea1.Position.Auto = false;
-            chartArea1.Position.Height = 75F;
+            chartArea1.Position.Height = 68F;
             chartArea1.Position.Width = 100F;
             chartArea2.AlignWithChartArea = "Values";
             chartArea2.AlignmentOrientation = System.Windows.Forms.DataVisualization.Charting.AreaAlignmentOrientations.Vertical;
-            chartArea2.AxisX.LabelStyle.Angle = -30;
+            chartArea2.AxisX.LabelStyle.Angle = 0;
             chartArea2.AxisX.LabelStyle.Format = "HH:mm:ss";
+            chartArea2.AxisX.LabelStyle.IsEndLabelVisible = false;
             chartArea2.AxisX.LineColor = System.Drawing.Color.FromArgb(((int)(((byte)(120)))), ((int)(((byte)(130)))), ((int)(((byte)(145)))));
             chartArea2.AxisX.MajorGrid.LineColor = System.Drawing.Color.FromArgb(((int)(((byte)(228)))), ((int)(((byte)(232)))), ((int)(((byte)(240)))));
             chartArea2.AxisX.ScaleView.Zoomable = true;
             chartArea2.AxisX.ScrollBar.ButtonStyle = System.Windows.Forms.DataVisualization.Charting.ScrollBarButtonStyles.SmallScroll;
             chartArea2.AxisX.ScrollBar.Enabled = true;
+            chartArea2.AxisX.Title = "Time";
             chartArea2.AxisY.CustomLabels.Add(-0.35D, 0.35D, "OFF");
             chartArea2.AxisY.CustomLabels.Add(0.65D, 1.35D, "ON");
             chartArea2.AxisY.Interval = 1D;
@@ -777,15 +794,15 @@
             chartArea2.AxisY2.Enabled = System.Windows.Forms.DataVisualization.Charting.AxisEnabled.False;
             chartArea2.BackColor = System.Drawing.Color.White;
             chartArea2.InnerPlotPosition.Auto = false;
-            chartArea2.InnerPlotPosition.Height = 66F;
-            chartArea2.InnerPlotPosition.Width = 82F;
-            chartArea2.InnerPlotPosition.X = 10F;
-            chartArea2.InnerPlotPosition.Y = 5F;
+            chartArea2.InnerPlotPosition.Height = 42F;
+            chartArea2.InnerPlotPosition.Width = 76F;
+            chartArea2.InnerPlotPosition.X = 12F;
+            chartArea2.InnerPlotPosition.Y = 3F;
             chartArea2.Name = "Status";
             chartArea2.Position.Auto = false;
-            chartArea2.Position.Height = 26F;
+            chartArea2.Position.Height = 31F;
             chartArea2.Position.Width = 100F;
-            chartArea2.Position.Y = 74F;
+            chartArea2.Position.Y = 67F;
             this.chartRealtime.ChartAreas.Add(chartArea1);
             this.chartRealtime.ChartAreas.Add(chartArea2);
             this.chartRealtime.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -833,7 +850,7 @@
             this.chartRealtime.Series.Add(series3);
             this.chartRealtime.Series.Add(series4);
             this.chartRealtime.Series.Add(series5);
-            this.chartRealtime.Size = new System.Drawing.Size(488, 345);
+            this.chartRealtime.Size = new System.Drawing.Size(488, 317);
             this.chartRealtime.TabIndex = 0;
             this.chartRealtime.Text = "Realtime chamber graph";
             //
@@ -867,7 +884,7 @@
             this.dgvGraphValues.Name = "dgvGraphValues";
             this.dgvGraphValues.RowHeadersVisible = false;
             this.dgvGraphValues.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.dgvGraphValues.Size = new System.Drawing.Size(210, 269);
+            this.dgvGraphValues.Size = new System.Drawing.Size(210, 241);
             this.dgvGraphValues.TabIndex = 0;
             //
             // colGraphVisible
@@ -905,7 +922,7 @@
             this.lblGraphProbe.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.lblGraphProbe.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.lblGraphProbe.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(45)))), ((int)(((byte)(58)))), ((int)(((byte)(75)))));
-            this.lblGraphProbe.Location = new System.Drawing.Point(2, 273);
+            this.lblGraphProbe.Location = new System.Drawing.Point(2, 245);
             this.lblGraphProbe.Name = "lblGraphProbe";
             this.lblGraphProbe.Padding = new System.Windows.Forms.Padding(8, 6, 6, 4);
             this.lblGraphProbe.Size = new System.Drawing.Size(210, 76);
@@ -923,9 +940,22 @@
             this.pnlGraphToolbar.Controls.Add(this.chkGraphAutoFollow);
             this.pnlGraphToolbar.Controls.Add(this.btnGraphResetView);
             this.pnlGraphToolbar.Controls.Add(this.lblGraphSampling);
+            this.pnlGraphToolbar.Controls.Add(this.lblGraphMouseMode);
+            this.pnlGraphToolbar.Controls.Add(this.cmbGraphMouseMode);
+            this.pnlGraphToolbar.Controls.Add(this.lblGraphTempRange);
+            this.pnlGraphToolbar.Controls.Add(this.txtGraphTempMin);
+            this.pnlGraphToolbar.Controls.Add(this.lblGraphTempTo);
+            this.pnlGraphToolbar.Controls.Add(this.txtGraphTempMax);
+            this.pnlGraphToolbar.Controls.Add(this.lblGraphHumiRange);
+            this.pnlGraphToolbar.Controls.Add(this.txtGraphHumiMin);
+            this.pnlGraphToolbar.Controls.Add(this.lblGraphHumiTo);
+            this.pnlGraphToolbar.Controls.Add(this.txtGraphHumiMax);
+            this.pnlGraphToolbar.Controls.Add(this.btnGraphApplyY);
+            this.pnlGraphToolbar.Controls.Add(this.btnGraphAutoY);
+            this.pnlGraphToolbar.Controls.Add(this.lblGraphMouseHint);
             this.pnlGraphToolbar.Location = new System.Drawing.Point(0, 0);
             this.pnlGraphToolbar.Name = "pnlGraphToolbar";
-            this.pnlGraphToolbar.Size = new System.Drawing.Size(718, 36);
+            this.pnlGraphToolbar.Size = new System.Drawing.Size(718, 64);
             this.pnlGraphToolbar.TabIndex = 0;
             //
             // lblGraphTitle
@@ -1007,6 +1037,141 @@
             this.lblGraphSampling.TabIndex = 5;
             this.lblGraphSampling.Text = "Source: Hold last value  |  Sampling: 10s";
             this.lblGraphSampling.TextAlign = System.Drawing.ContentAlignment.TopRight;
+            //
+            // lblGraphMouseMode
+            //
+            this.lblGraphMouseMode.AutoSize = true;
+            this.lblGraphMouseMode.ForeColor = System.Drawing.Color.White;
+            this.lblGraphMouseMode.Location = new System.Drawing.Point(10, 42);
+            this.lblGraphMouseMode.Name = "lblGraphMouseMode";
+            this.lblGraphMouseMode.Size = new System.Drawing.Size(34, 13);
+            this.lblGraphMouseMode.TabIndex = 6;
+            this.lblGraphMouseMode.Text = "Mode";
+            //
+            // cmbGraphMouseMode
+            //
+            this.cmbGraphMouseMode.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cmbGraphMouseMode.FormattingEnabled = true;
+            this.cmbGraphMouseMode.Items.AddRange(new object[] {
+            "Zoom Box",
+            "Pan Hand"});
+            this.cmbGraphMouseMode.Location = new System.Drawing.Point(47, 37);
+            this.cmbGraphMouseMode.Name = "cmbGraphMouseMode";
+            this.cmbGraphMouseMode.Size = new System.Drawing.Size(82, 21);
+            this.cmbGraphMouseMode.TabIndex = 7;
+            this.toolTipGraph.SetToolTip(this.cmbGraphMouseMode, "Zoom Box: drag a rectangle. Pan Hand: drag left or right.");
+            //
+            // lblGraphTempRange
+            //
+            this.lblGraphTempRange.AutoSize = true;
+            this.lblGraphTempRange.ForeColor = System.Drawing.Color.White;
+            this.lblGraphTempRange.Location = new System.Drawing.Point(136, 42);
+            this.lblGraphTempRange.Name = "lblGraphTempRange";
+            this.lblGraphTempRange.Size = new System.Drawing.Size(46, 13);
+            this.lblGraphTempRange.TabIndex = 8;
+            this.lblGraphTempRange.Text = "Temp °C";
+            //
+            // txtGraphTempMin
+            //
+            this.txtGraphTempMin.Location = new System.Drawing.Point(184, 38);
+            this.txtGraphTempMin.Name = "txtGraphTempMin";
+            this.txtGraphTempMin.Size = new System.Drawing.Size(40, 20);
+            this.txtGraphTempMin.TabIndex = 9;
+            this.txtGraphTempMin.Text = "-40";
+            this.txtGraphTempMin.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            //
+            // lblGraphTempTo
+            //
+            this.lblGraphTempTo.AutoSize = true;
+            this.lblGraphTempTo.ForeColor = System.Drawing.Color.White;
+            this.lblGraphTempTo.Location = new System.Drawing.Point(227, 42);
+            this.lblGraphTempTo.Name = "lblGraphTempTo";
+            this.lblGraphTempTo.Size = new System.Drawing.Size(10, 13);
+            this.lblGraphTempTo.TabIndex = 10;
+            this.lblGraphTempTo.Text = "-";
+            //
+            // txtGraphTempMax
+            //
+            this.txtGraphTempMax.Location = new System.Drawing.Point(239, 38);
+            this.txtGraphTempMax.Name = "txtGraphTempMax";
+            this.txtGraphTempMax.Size = new System.Drawing.Size(40, 20);
+            this.txtGraphTempMax.TabIndex = 11;
+            this.txtGraphTempMax.Text = "120";
+            this.txtGraphTempMax.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            //
+            // lblGraphHumiRange
+            //
+            this.lblGraphHumiRange.AutoSize = true;
+            this.lblGraphHumiRange.ForeColor = System.Drawing.Color.White;
+            this.lblGraphHumiRange.Location = new System.Drawing.Point(287, 42);
+            this.lblGraphHumiRange.Name = "lblGraphHumiRange";
+            this.lblGraphHumiRange.Size = new System.Drawing.Size(44, 13);
+            this.lblGraphHumiRange.TabIndex = 12;
+            this.lblGraphHumiRange.Text = "Humi %";
+            //
+            // txtGraphHumiMin
+            //
+            this.txtGraphHumiMin.Location = new System.Drawing.Point(334, 38);
+            this.txtGraphHumiMin.Name = "txtGraphHumiMin";
+            this.txtGraphHumiMin.Size = new System.Drawing.Size(38, 20);
+            this.txtGraphHumiMin.TabIndex = 13;
+            this.txtGraphHumiMin.Text = "0";
+            this.txtGraphHumiMin.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            //
+            // lblGraphHumiTo
+            //
+            this.lblGraphHumiTo.AutoSize = true;
+            this.lblGraphHumiTo.ForeColor = System.Drawing.Color.White;
+            this.lblGraphHumiTo.Location = new System.Drawing.Point(375, 42);
+            this.lblGraphHumiTo.Name = "lblGraphHumiTo";
+            this.lblGraphHumiTo.Size = new System.Drawing.Size(10, 13);
+            this.lblGraphHumiTo.TabIndex = 14;
+            this.lblGraphHumiTo.Text = "-";
+            //
+            // txtGraphHumiMax
+            //
+            this.txtGraphHumiMax.Location = new System.Drawing.Point(387, 38);
+            this.txtGraphHumiMax.Name = "txtGraphHumiMax";
+            this.txtGraphHumiMax.Size = new System.Drawing.Size(38, 20);
+            this.txtGraphHumiMax.TabIndex = 15;
+            this.txtGraphHumiMax.Text = "100";
+            this.txtGraphHumiMax.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            //
+            // btnGraphApplyY
+            //
+            this.btnGraphApplyY.BackColor = System.Drawing.Color.White;
+            this.btnGraphApplyY.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(154)))), ((int)(((byte)(184)))), ((int)(((byte)(224)))));
+            this.btnGraphApplyY.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnGraphApplyY.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(9)))), ((int)(((byte)(45)))), ((int)(((byte)(112)))));
+            this.btnGraphApplyY.Location = new System.Drawing.Point(434, 35);
+            this.btnGraphApplyY.Name = "btnGraphApplyY";
+            this.btnGraphApplyY.Size = new System.Drawing.Size(64, 26);
+            this.btnGraphApplyY.TabIndex = 16;
+            this.btnGraphApplyY.Text = "Apply Y";
+            this.btnGraphApplyY.UseVisualStyleBackColor = false;
+            //
+            // btnGraphAutoY
+            //
+            this.btnGraphAutoY.BackColor = System.Drawing.Color.White;
+            this.btnGraphAutoY.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(154)))), ((int)(((byte)(184)))), ((int)(((byte)(224)))));
+            this.btnGraphAutoY.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnGraphAutoY.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(9)))), ((int)(((byte)(45)))), ((int)(((byte)(112)))));
+            this.btnGraphAutoY.Location = new System.Drawing.Point(504, 35);
+            this.btnGraphAutoY.Name = "btnGraphAutoY";
+            this.btnGraphAutoY.Size = new System.Drawing.Size(58, 26);
+            this.btnGraphAutoY.TabIndex = 17;
+            this.btnGraphAutoY.Text = "Y Auto";
+            this.btnGraphAutoY.UseVisualStyleBackColor = false;
+            //
+            // lblGraphMouseHint
+            //
+            this.lblGraphMouseHint.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(210)))), ((int)(((byte)(230)))), ((int)(((byte)(255)))));
+            this.lblGraphMouseHint.Location = new System.Drawing.Point(568, 38);
+            this.lblGraphMouseHint.Name = "lblGraphMouseHint";
+            this.lblGraphMouseHint.Size = new System.Drawing.Size(144, 22);
+            this.lblGraphMouseHint.TabIndex = 18;
+            this.lblGraphMouseHint.Text = "Drag: rectangle zoom";
+            this.lblGraphMouseHint.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             //
             // Form1
             // 
@@ -1117,6 +1282,19 @@
         private System.Windows.Forms.CheckBox chkGraphAutoFollow;
         private System.Windows.Forms.Button btnGraphResetView;
         private System.Windows.Forms.Label lblGraphSampling;
+        private System.Windows.Forms.Label lblGraphMouseMode;
+        private System.Windows.Forms.ComboBox cmbGraphMouseMode;
+        private System.Windows.Forms.Label lblGraphTempRange;
+        private System.Windows.Forms.TextBox txtGraphTempMin;
+        private System.Windows.Forms.Label lblGraphTempTo;
+        private System.Windows.Forms.TextBox txtGraphTempMax;
+        private System.Windows.Forms.Label lblGraphHumiRange;
+        private System.Windows.Forms.TextBox txtGraphHumiMin;
+        private System.Windows.Forms.Label lblGraphHumiTo;
+        private System.Windows.Forms.TextBox txtGraphHumiMax;
+        private System.Windows.Forms.Button btnGraphApplyY;
+        private System.Windows.Forms.Button btnGraphAutoY;
+        private System.Windows.Forms.Label lblGraphMouseHint;
         private System.Windows.Forms.ToolTip toolTipGraph;
 
         // New controls for TCP/Serial mode
