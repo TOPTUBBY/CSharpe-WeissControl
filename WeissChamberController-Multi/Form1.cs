@@ -21,6 +21,9 @@ namespace Form1
         // Timer for automatic parameter retrieval
         private System.Windows.Forms.Timer tmrAutoGet;
 
+        // Keeps the graph time axis moving with the last value when Auto Get is disabled.
+        private System.Windows.Forms.Timer tmrGraphHold;
+
         // Timer for closing the current CSV and opening a new one at midnight
         private System.Windows.Forms.Timer tmrLogRollover;
 
@@ -40,6 +43,21 @@ namespace Form1
         // Stores the log directory path
         private string _logDirectoryPath;
 
+        private RealtimeGraphPanel _realtimeGraphPanel;
+        private Button _btnGraphTab;
+        private ToolTip _graphToolTip;
+        private bool _graphExpanded;
+        private int _collapsedClientWidth;
+        private const int GraphTabWidth = 34;
+        private const int GraphPanelWidth = 720;
+
+        private bool _hasGraphReading;
+        private double _latestTempSet;
+        private double _latestTempActual;
+        private double _latestHumiditySet;
+        private double _latestHumidityActual;
+        private bool _latestChamberStatus;
+
         private List<string> BlackList = new List<string>();
         private List<string> file_List = new List<string>();
 
@@ -47,6 +65,7 @@ namespace Form1
         {
             InitializeComponent();
             InitializeTimer();
+            InitializeRealtimeGraph();
             InitializeCommControls();
             UpdateUIStatus(false); // Start with Disconnected status
         }
@@ -84,8 +103,62 @@ namespace Form1
             tmrAutoGet.Tick += new EventHandler(tmrAutoGet_Tick);
             tmrAutoGet.Interval = 5000; // Default to 5 seconds
 
+            tmrGraphHold = new System.Windows.Forms.Timer();
+            tmrGraphHold.Tick += new EventHandler(tmrGraphHold_Tick);
+            tmrGraphHold.Interval = 5000;
+
             tmrLogRollover = new System.Windows.Forms.Timer();
             tmrLogRollover.Tick += new EventHandler(tmrLogRollover_Tick);
+        }
+
+        private void InitializeRealtimeGraph()
+        {
+            int originalWidth = ClientSize.Width;
+            _collapsedClientWidth = originalWidth + GraphTabWidth;
+            ClientSize = new System.Drawing.Size(_collapsedClientWidth, ClientSize.Height);
+
+            _btnGraphTab = new Button
+            {
+                Location = new System.Drawing.Point(originalWidth, 72),
+                Size = new System.Drawing.Size(GraphTabWidth, 142),
+                BackColor = System.Drawing.Color.FromArgb(9, 45, 112),
+                ForeColor = System.Drawing.Color.White,
+                FlatStyle = FlatStyle.Flat,
+                Font = new System.Drawing.Font(Font.FontFamily, 8F, System.Drawing.FontStyle.Bold),
+                Text = "G\r\nR\r\nA\r\nP\r\nH\r\n▶",
+                TabStop = false
+            };
+            _btnGraphTab.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(70, 130, 205);
+            _btnGraphTab.Click += btnGraphTab_Click;
+
+            _realtimeGraphPanel = new RealtimeGraphPanel
+            {
+                Location = new System.Drawing.Point(_collapsedClientWidth, 0),
+                Size = new System.Drawing.Size(GraphPanelWidth, ClientSize.Height),
+                Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left,
+                Visible = false
+            };
+
+            _graphToolTip = new ToolTip();
+            _graphToolTip.SetToolTip(_btnGraphTab, "Open or close the real-time graph workspace");
+
+            Controls.Add(_realtimeGraphPanel);
+            Controls.Add(_btnGraphTab);
+            _btnGraphTab.BringToFront();
+        }
+
+        private void btnGraphTab_Click(object sender, EventArgs e)
+        {
+            _graphExpanded = !_graphExpanded;
+            SuspendLayout();
+            _realtimeGraphPanel.Visible = _graphExpanded;
+            ClientSize = new System.Drawing.Size(
+                _collapsedClientWidth + (_graphExpanded ? GraphPanelWidth : 0),
+                ClientSize.Height);
+            _btnGraphTab.Text = _graphExpanded
+                ? "G\r\nR\r\nA\r\nP\r\nH\r\n◀"
+                : "G\r\nR\r\nA\r\nP\r\nH\r\n▶";
+            ResumeLayout(true);
         }
 
         private void InitializeCommControls()
@@ -123,6 +196,8 @@ namespace Form1
                     "1min", "5min", "10min", "30min", "1hr"
             });
             cmbSamplingRate.SelectedIndex = 7; // Default to 10s
+
+            UpdateGraphSamplingState();
 
             // Default radio mode
             radioSerial.Checked = true;
@@ -380,6 +455,14 @@ namespace Form1
                     txtCurrentTemp.Text = tCurr.ToString("0.0");
                     txtCurrentHumidity.Text = hCurr.ToString("0.0");
 
+                    _latestTempSet = tSet;
+                    _latestTempActual = tCurr;
+                    _latestHumiditySet = hSet;
+                    _latestHumidityActual = hCurr;
+                    _latestChamberStatus = isEnabled;
+                    _hasGraphReading = true;
+                    _realtimeGraphPanel.AddSample(DateTime.Now, tSet, tCurr, hSet, hCurr, isEnabled);
+
                     if (_isLogging)
                         LogCurrentParams(tSet, tCurr, hSet, hCurr, isEnabled);
 
@@ -617,6 +700,61 @@ namespace Form1
             await GetAndDisplayCurrentParams();
         }
 
+        private void tmrGraphHold_Tick(object sender, EventArgs e)
+        {
+            if (!_hasGraphReading || chkAutoGet.Checked)
+                return;
+
+            _realtimeGraphPanel.AddSample(
+                DateTime.Now,
+                _latestTempSet,
+                _latestTempActual,
+                _latestHumiditySet,
+                _latestHumidityActual,
+                _latestChamberStatus);
+        }
+
+        private int GetSelectedSamplingIntervalMs()
+        {
+            string selectedRate = cmbSamplingRate.SelectedItem == null
+                ? "10s"
+                : cmbSamplingRate.SelectedItem.ToString();
+
+            switch (selectedRate)
+            {
+                case "1ms": return 1;
+                case "10ms": return 10;
+                case "100ms": return 100;
+                case "500ms": return 500;
+                case "1s": return 1000;
+                case "2s": return 2000;
+                case "5s": return 5000;
+                case "10s": return 10000;
+                case "30s": return 30000;
+                case "1min": return 60000;
+                case "5min": return 300000;
+                case "10min": return 600000;
+                case "30min": return 1800000;
+                case "1hr": return 3600000;
+                default: return 10000;
+            }
+        }
+
+        private void UpdateGraphSamplingState()
+        {
+            int intervalMs = GetSelectedSamplingIntervalMs();
+            tmrGraphHold.Stop();
+            tmrGraphHold.Interval = intervalMs;
+
+            if (!chkAutoGet.Checked)
+                tmrGraphHold.Start();
+
+            string samplingText = cmbSamplingRate.SelectedItem == null
+                ? "10s"
+                : cmbSamplingRate.SelectedItem.ToString();
+            _realtimeGraphPanel.SetSamplingMode(samplingText, chkAutoGet.Checked);
+        }
+
         private void btnBrowseLogPath_Click(object sender, EventArgs e)
         {
             using (FolderBrowserDialog folderDialog = new FolderBrowserDialog())
@@ -644,21 +782,11 @@ namespace Form1
                 }
 
                 string selectedRate = cmbSamplingRate.SelectedItem.ToString();
-                int intervalMs = 0;
-
-                switch (selectedRate)
-                {
-                    case "1s": intervalMs = 1000; break;
-                    case "2s": intervalMs = 2000; break;
-                    case "5s": intervalMs = 5000; break;
-                    case "10s": intervalMs = 10000; break;
-                    case "30s": intervalMs = 30000; break;
-                    case "60s": intervalMs = 60000; break;
-                    default: intervalMs = 5000; break;
-                }
+                int intervalMs = GetSelectedSamplingIntervalMs();
 
                 tmrAutoGet.Interval = intervalMs;
                 tmrAutoGet.Start();
+                UpdateGraphSamplingState();
                 txtErrStr.Text = $"Start autoget at {selectedRate}";
 
                 chkCsvLogging.Enabled = true;
@@ -667,6 +795,7 @@ namespace Form1
             else
             {
                 tmrAutoGet.Stop();
+                UpdateGraphSamplingState();
                 txtErrStr.Text = "Autoget stopped";
 
                 if (chkCsvLogging.Checked)
@@ -742,29 +871,12 @@ namespace Form1
 
         private async void cmbSamplingRate_SelectedIndexChanged(object sender, EventArgs e)
         {
+            int intervalMs = GetSelectedSamplingIntervalMs();
+            UpdateGraphSamplingState();
+
             if (chkAutoGet.Checked)
             {
                 string selectedRate = cmbSamplingRate.SelectedItem.ToString();
-                int intervalMs = 0;
-
-                switch (selectedRate)
-                {
-                    case "1ms": intervalMs = 1; break;
-                    case "10ms": intervalMs = 10; break;
-                    case "100ms": intervalMs = 100; break;
-                    case "500ms": intervalMs = 500; break;
-                    case "1s": intervalMs = 1000; break;
-                    case "2s": intervalMs = 2000; break;
-                    case "5s": intervalMs = 5000; break;
-                    case "10s": intervalMs = 10000; break;
-                    case "30s": intervalMs = 30000; break;
-                    case "1min": intervalMs = 60000; break;
-                    case "5min": intervalMs = 300000; break;
-                    case "10min": intervalMs = 600000; break;
-                    case "30min": intervalMs = 1800000; break;
-                    case "1hr": intervalMs = 3600000; break;
-                    default: intervalMs = 10000; break;
-                }
 
                 tmrAutoGet.Stop();
                 tmrAutoGet.Interval = intervalMs;
@@ -773,6 +885,20 @@ namespace Form1
 
                 await GetAndDisplayCurrentParams();
             }
+        }
+
+        protected override void OnFormClosed(FormClosedEventArgs e)
+        {
+            if (tmrGraphHold != null)
+            {
+                tmrGraphHold.Stop();
+                tmrGraphHold.Dispose();
+            }
+
+            if (_graphToolTip != null)
+                _graphToolTip.Dispose();
+
+            base.OnFormClosed(e);
         }
 
         private void lblAbout_Click(object sender, EventArgs e)
