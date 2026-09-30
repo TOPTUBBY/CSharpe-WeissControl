@@ -307,11 +307,11 @@ For questions or support: [TOPTUBBY](https://github.com/TOPTUBBY)
 | | | 📐 Added fixed Temp/Humidity Y-axis ranges with Apply Y and automatic scaling with Auto Y |
 | | | ⏱️ Added Time/Div selections from 10 seconds through All (24 hours), sampling linked to Autoget, hold-last-value mode, long-history fading, and rendering decimation |
 | | | 🎨 Moved the complete graph workspace layout into the WinForms Designer and refined the fixed-window layout, timestamps, legends, and value table |
-| **v1.1.08.2026** | 2026-08-20 | 🎉 Added logging mode function for WeissChamberController |
-| **v1.1.08.2026** | 2026-08-20 | 🎉 Added logging mode function for WeissChamberController-Multi |
-| **v2.1.08.2026** | 2026-08-20 | 🎉 Added logging mode function for WeissChamberController-Shock |
+| **v2.0.08.2026** | 2026-08-20 | 🎉 Added logging mode function for WeissChamberController |
+| **v2.0.08.2026** | 2026-08-20 | 🎉 Added logging mode function for WeissChamberController-Multi |
+| **v2.0.08.2026** | 2026-08-20 | 🎉 Added logging mode function for WeissChamberController-Shock |
 | **v1.0.04.2026** | 2026-04-11 | 🎉 Added WeissChamberController-Shock |
-| **v2.0.11.2025** | 2026-03-05 | 🎉 Initial Release |
+| **v1.0.11.2025** | 2026-03-05 | 🎉 Initial Release |
 | | | ✨ Single chamber support |
 | | | ✨ Multi-chamber orchestration |
 | | | ✨ Complete protocol implementation |
