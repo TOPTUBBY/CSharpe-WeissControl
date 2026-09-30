@@ -223,7 +223,7 @@ namespace Form1
 
         private void RenderTimer_Tick(object sender, EventArgs e)
         {
-            if (!_chartDirty || !_workspace.Visible || _disposed)
+            if (!_chartDirty || !_workspace.Visible || _disposed || _dragging)
                 return;
             RefreshNow();
         }
@@ -322,15 +322,15 @@ namespace Form1
                 axis.Interval = Math.Max(1.0, Math.Ceiling(span.TotalHours / 5.0));
             }
 
-            axis.ScaleView.ZoomReset(0);
             double dataMinimum = dataStart.ToOADate();
             double dataMaximum = Math.Max(dataStart.AddSeconds(1).ToOADate(), end.ToOADate());
             axis.Minimum = dataMinimum;
             axis.Maximum = dataMaximum;
             if (_autoFollowCheck.Checked)
             {
-                if (viewStart > dataStart)
-                    axis.ScaleView.Zoom(viewStart.ToOADate(), end.ToOADate());
+                // Move the existing view instead of resetting zoom on every sample.
+                // Resetting briefly removes the scrollbar and changes plot geometry.
+                SetTimeWindow(axis, viewStart.ToOADate(), end.ToOADate());
             }
             else if (preserveView)
             {
@@ -343,7 +343,27 @@ namespace Form1
                     minimum = Math.Max(dataMinimum, maximum - viewWidth);
                 }
                 if (maximum > minimum)
-                    axis.ScaleView.Zoom(minimum, maximum);
+                    SetTimeWindow(axis, minimum, maximum);
+            }
+        }
+
+        private static void SetTimeWindow(Axis axis, double minimum, double maximum)
+        {
+            double width = maximum - minimum;
+            if (width <= 0 || double.IsNaN(width) || double.IsInfinity(width))
+                return;
+
+            AxisScaleView view = axis.ScaleView;
+            double currentWidth = view.ViewMaximum - view.ViewMinimum;
+            if (view.IsZoomed && Math.Abs(currentWidth - width) < 1e-8)
+            {
+                // Scroll preserves the zoom size, scrollbar and zoom history.
+                view.Scroll(minimum);
+            }
+            else
+            {
+                // Realtime updates must not accumulate a saved zoom per sample.
+                view.Zoom(minimum, width, DateTimeIntervalType.Number, false);
             }
         }
 
@@ -557,7 +577,7 @@ namespace Form1
                 return;
 
             foreach (ChartArea area in _chart.ChartAreas)
-                area.AxisX.ScaleView.Zoom(minimum, maximum);
+                SetTimeWindow(area.AxisX, minimum, maximum);
         }
 
         private Rectangle GetValuesPlotRectangle()
@@ -696,11 +716,6 @@ namespace Form1
 
         private void AutoFollowCheck_CheckedChanged(object sender, EventArgs e)
         {
-            if (_autoFollowCheck.Checked)
-            {
-                foreach (ChartArea area in _chart.ChartAreas)
-                    area.AxisX.ScaleView.ZoomReset(0);
-            }
             _chartDirty = true;
         }
 
